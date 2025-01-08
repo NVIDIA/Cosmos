@@ -2,16 +2,31 @@ import gradio as gr
 import subprocess
 import numpy as np
 
+# Define aspect ratios with corresponding width and height
+aspect_ratios = [
+    {"label": "1:1", "width": 960, "height": 960},
+    {"label": "4:3", "width": 960, "height": 704},
+    {"label": "3:4", "width": 704, "height": 960},
+    {"label": "16:9", "width": 1280, "height": 704},
+    {"label": "9:16", "width": 704, "height": 1280},
+]
+
 # Function to run text2world.py
 def generate_text2world(
-    prompt, model_size, offload_options, seed, negative_prompt, num_steps, guidance, num_video_frames, height, width, fps, disable_prompt_upsampler
+    prompt, model_size, offload_options, seed, negative_prompt, num_steps, guidance, num_video_frames,
+    aspect_ratio, fps, disable_prompt_upsampler
 ):
+    # Get width and height based on aspect ratio
+    selected_ar = next(ar for ar in aspect_ratios if ar["label"] == aspect_ratio)
+    width = selected_ar["width"]
+    height = selected_ar["height"]
+    
     offload_prompt_upsampler = 'Offload Prompt Upsampler' in offload_options
     offload_guardrail_models = 'Offload Guardrail Models' in offload_options
     offload_tokenizer = 'Offload Tokenizer' in offload_options
     offload_diffusion_transformer = 'Offload Diffusion Transformer' in offload_options
     offload_text_encoder_model = 'Offload Text Encoder Model' in offload_options
-
+    
     args = [
         'PYTHONPATH=$(pwd) python cosmos1/models/diffusion/inference/text2world.py',
         '--checkpoint_dir checkpoints',
@@ -55,14 +70,19 @@ def generate_text2world(
 # Function to run video2world.py
 def generate_video2world(
     input_file, model_size, num_input_frames, prompt, disable_prompt_upsampler, offload_options, seed,
-    negative_prompt, num_steps, guidance, num_video_frames, height, width, fps
+    negative_prompt, num_steps, guidance, num_video_frames, aspect_ratio, fps
 ):
+    # Get width and height based on aspect ratio
+    selected_ar = next(ar for ar in aspect_ratios if ar["label"] == aspect_ratio)
+    width = selected_ar["width"]
+    height = selected_ar["height"]
+    
     offload_prompt_upsampler = 'Offload Prompt Upsampler' in offload_options
     offload_guardrail_models = 'Offload Guardrail Models' in offload_options
     offload_tokenizer = 'Offload Tokenizer' in offload_options
     offload_diffusion_transformer = 'Offload Diffusion Transformer' in offload_options
     offload_text_encoder_model = 'Offload Text Encoder Model' in offload_options
-
+    
     args = [
         'PYTHONPATH=$(pwd) python cosmos1/models/diffusion/inference/video2world.py',
         '--checkpoint_dir checkpoints',
@@ -118,8 +138,7 @@ with gr.Blocks() as demo:
         num_steps_text = gr.Number(label="Number of Steps", value=35)
         guidance_text = gr.Number(label="Guidance Scale", value=7)
         num_video_frames_text = gr.Number(label="Number of Video Frames", value=121, info="Must be divisible by 121")
-        height_text = gr.Number(label="Height", value=704)
-        width_text = gr.Number(label="Width", value=1280)
+        aspect_ratio_text = gr.Dropdown(choices=[ar["label"] for ar in aspect_ratios], label="Aspect Ratio", value="16:9")
         fps_text = gr.Number(label="FPS", value=24)
         generate_button_text = gr.Button("Generate Video")
         output_video_text = gr.Video(label="Generated Video")
@@ -129,7 +148,7 @@ with gr.Blocks() as demo:
             inputs=[
                 text_prompt, model_size_text, offload_options_text, seed_text,
                 negative_prompt_text, num_steps_text, guidance_text,
-                num_video_frames_text, height_text, width_text, fps_text,
+                num_video_frames_text, aspect_ratio_text, fps_text,
                 disable_prompt_upsampler_text
             ],
             outputs=output_video_text
@@ -147,8 +166,7 @@ with gr.Blocks() as demo:
         num_steps_video = gr.Number(label="Number of Steps", value=35)
         guidance_video = gr.Number(label="Guidance Scale", value=7)
         num_video_frames_video = gr.Number(label="Number of Video Frames", value=121, info="Must be divisible by 121")
-        height_video = gr.Number(label="Height", value=704)
-        width_video = gr.Number(label="Width", value=1280)
+        aspect_ratio_video = gr.Dropdown(choices=[ar["label"] for ar in aspect_ratios], label="Aspect Ratio", value="16:9")
         fps_video = gr.Number(label="FPS", value=24)
         generate_button_video = gr.Button("Generate Video")
         output_video_video = gr.Video(label="Generated Video")
@@ -159,7 +177,7 @@ with gr.Blocks() as demo:
                 input_file, model_size_video, num_input_frames, text_prompt_video,
                 disable_prompt_upsampler_video, offload_options_video, seed_video,
                 negative_prompt_video, num_steps_video, guidance_video,
-                num_video_frames_video, height_video, width_video, fps_video
+                num_video_frames_video, aspect_ratio_video, fps_video
             ],
             outputs=output_video_video
         )
