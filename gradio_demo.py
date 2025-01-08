@@ -181,5 +181,5 @@ with gr.Blocks() as demo:
             ],
             outputs=output_video_video
         )
-
-demo.launch(share=True)
+if __name__ == "__main__":
+    demo.launch(share=True)
