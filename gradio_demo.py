@@ -179,7 +179,7 @@ with gr.Blocks() as demo:
         )
         fps_text = gr.Number(label="FPS", value=24, info="From 12 to 40 possible fps is supported")
         generate_button_text = gr.Button("Generate Video")
-        output_video_text = gr.Video(label="Generated Video")
+        output_video_text = gr.Video(label="Generated Video") 
 
         generate_button_text.click(
             generate_text2world,
