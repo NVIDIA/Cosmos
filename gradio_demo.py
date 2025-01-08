@@ -13,7 +13,8 @@ def generate_text2world(
     offload_tokenizer = 'Offload Tokenizer' in offload_options
     offload_diffusion_transformer = 'Offload Diffusion Transformer' in offload_options
     offload_text_encoder_model = 'Offload Text Encoder Model' in offload_options
-    
+    num_video_frames_coef = (num_video_frames // fps) if (num_video_frames // fps) >= 1 else 1
+    num_video_frames = num_video_frames_coef * fps + 1 # cnunk lenth exception fix
     args = [
         'PYTHONPATH=$(pwd) python cosmos1/models/diffusion/inference/text2world.py',
         '--checkpoint_dir checkpoints',
@@ -64,7 +65,8 @@ def generate_video2world(
     offload_tokenizer = 'Offload Tokenizer' in offload_options
     offload_diffusion_transformer = 'Offload Diffusion Transformer' in offload_options
     offload_text_encoder_model = 'Offload Text Encoder Model' in offload_options
-    
+    num_video_frames_coef = (num_video_frames // fps) if (num_video_frames // fps) >= 1 else 1
+    num_video_frames = num_video_frames_coef * fps + 1 # cnunk lenth exception fix
     args = [
         'PYTHONPATH=$(pwd) python cosmos1/models/diffusion/inference/video2world.py',
         '--checkpoint_dir checkpoints',
