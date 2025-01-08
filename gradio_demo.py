@@ -1,7 +1,5 @@
 import gradio as gr
 import subprocess
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "2,3,4,5"
 import numpy as np
 
 # Function to run text2world.py
