@@ -139,7 +139,7 @@ with gr.Blocks() as demo:
         guidance_text = gr.Number(label="Guidance Scale", value=7)
         num_video_frames_text = gr.Number(label="Number of Video Frames", value=121, info="Must be divisible by 121")
         aspect_ratio_text = gr.Dropdown(choices=[ar["label"] for ar in aspect_ratios], label="Aspect Ratio", value="16:9")
-        fps_text = gr.Number(label="FPS", value=24)
+        fps_text = gr.Number(label="FPS", value=24, info="From 12 to 40 possible fps is supported")
         generate_button_text = gr.Button("Generate Video")
         output_video_text = gr.Video(label="Generated Video")
         
@@ -167,7 +167,7 @@ with gr.Blocks() as demo:
         guidance_video = gr.Number(label="Guidance Scale", value=7)
         num_video_frames_video = gr.Number(label="Number of Video Frames", value=121, info="Must be divisible by 121")
         aspect_ratio_video = gr.Dropdown(choices=[ar["label"] for ar in aspect_ratios], label="Aspect Ratio", value="16:9")
-        fps_video = gr.Number(label="FPS", value=24)
+        fps_video = gr.Number(label="FPS", value=24, info="From 12 to 40 possible fps is supported")
         generate_button_video = gr.Button("Generate Video")
         output_video_video = gr.Video(label="Generated Video")
         
