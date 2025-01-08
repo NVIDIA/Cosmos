@@ -27,4 +27,5 @@ peft
 pillow
 sentencepiece
 termcolor
+gradio
 transformers==4.45.0
