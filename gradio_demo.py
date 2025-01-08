@@ -11,8 +11,7 @@ def generate_text2world(
     offload_tokenizer = 'Offload Tokenizer' in offload_options
     offload_diffusion_transformer = 'Offload Diffusion Transformer' in offload_options
     offload_text_encoder_model = 'Offload Text Encoder Model' in offload_options
-    num_video_frames_coef = (num_video_frames // fps) if (num_video_frames // fps) >= 1 else 1
-    num_video_frames = num_video_frames_coef * fps + 1 # cnunk lenth exception fix
+
     args = [
         'PYTHONPATH=$(pwd) python cosmos1/models/diffusion/inference/text2world.py',
         '--checkpoint_dir checkpoints',
@@ -63,8 +62,7 @@ def generate_video2world(
     offload_tokenizer = 'Offload Tokenizer' in offload_options
     offload_diffusion_transformer = 'Offload Diffusion Transformer' in offload_options
     offload_text_encoder_model = 'Offload Text Encoder Model' in offload_options
-    num_video_frames_coef = (num_video_frames // fps) if (num_video_frames // fps) >= 1 else 1
-    num_video_frames = num_video_frames_coef * fps + 1 # cnunk lenth exception fix
+
     args = [
         'PYTHONPATH=$(pwd) python cosmos1/models/diffusion/inference/video2world.py',
         '--checkpoint_dir checkpoints',
@@ -119,7 +117,7 @@ with gr.Blocks() as demo:
         negative_prompt_text = gr.Textbox(label="Negative Prompt", value="""The video captures a series of frames showing ugly scenes, static with no motion, motion blur, over-saturation, shaky footage, low resolution, grainy texture, pixelated images, poorly lit areas, underexposed and overexposed scenes, poor color balance, washed out colors, choppy sequences, jerky movements, low frame rate, artifacting, color banding, unnatural transitions, outdated special effects, fake elements, unconvincing visuals, poorly edited content, jump cuts, visual noise, and flickering. Overall, the video is of poor quality.""", lines=5)
         num_steps_text = gr.Number(label="Number of Steps", value=35)
         guidance_text = gr.Number(label="Guidance Scale", value=7)
-        num_video_frames_text = gr.Number(label="Number of Video Frames", value=121)
+        num_video_frames_text = gr.Number(label="Number of Video Frames", value=121, info="Must be divisible by 121")
         height_text = gr.Number(label="Height", value=704)
         width_text = gr.Number(label="Width", value=1280)
         fps_text = gr.Number(label="FPS", value=24)
@@ -148,7 +146,7 @@ with gr.Blocks() as demo:
         negative_prompt_video = gr.Textbox(label="Negative Prompt", value="""The video captures a series of frames showing ugly scenes, static with no motion, motion blur, over-saturation, shaky footage, low resolution, grainy texture, pixelated images, poorly lit areas, underexposed and overexposed scenes, poor color balance, washed out colors, choppy sequences, jerky movements, low frame rate, artifacting, color banding, unnatural transitions, outdated special effects, fake elements, unconvincing visuals, poorly edited content, jump cuts, visual noise, and flickering. Overall, the video is of poor quality.""", lines=5)
         num_steps_video = gr.Number(label="Number of Steps", value=35)
         guidance_video = gr.Number(label="Guidance Scale", value=7)
-        num_video_frames_video = gr.Number(label="Number of Video Frames", value=121)
+        num_video_frames_video = gr.Number(label="Number of Video Frames", value=121, info="Must be divisible by 121")
         height_video = gr.Number(label="Height", value=704)
         width_video = gr.Number(label="Width", value=1280)
         fps_video = gr.Number(label="FPS", value=24)
