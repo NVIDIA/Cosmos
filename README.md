@@ -7,7 +7,7 @@
 [NVIDIA Cosmos](https://www.nvidia.com/cosmos/) is a developer-first world foundation model platform designed to help Physical AI developers build their Physical AI systems better and faster. Cosmos contains
 
 1. pre-trained models, available via [Hugging Face](https://huggingface.co/collections/nvidia/cosmos-6751e884dc10e013a0a0d8e6) under the [NVIDIA Open Model License](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-license/) that allows commercial use of the models for free
-2. training/fine-tuning scripts under the [Apache 2 License](https://www.apache.org/licenses/LICENSE-2.0), offered through [NVIDIA Nemo Framework](https://github.com/NVIDIA/NeMo) for training/fine-tuning the models for various downstream Physical AI applications
+2. training scripts under the [Apache 2 License](https://www.apache.org/licenses/LICENSE-2.0), offered through [NVIDIA Nemo Framework](https://github.com/NVIDIA/NeMo) for post-training the models for various downstream Physical AI applications
 
 Details of the platform is described in the [Cosmos paper](https://research.nvidia.com/publication/2025-01_cosmos-world-foundation-model-platform-physical-ai). Preview access is avaiable at [build.nvidia.com](https://build.nvidia.com).
 
@@ -16,9 +16,9 @@ Details of the platform is described in the [Cosmos paper](https://research.nvid
 - [Pre-trained Diffusion-based world foundation models](cosmos1/models/diffusion/README.md) for Text2World and Video2World generation where a user can generate visual simulation based on text prompts and video prompts.
 - [Pre-trained Autoregressive-based world foundation models](cosmos1/models/autoregressive/README.md) for Video2World generation where a user can generate visual simulation based on video prompts and optional text prompts.
 - [Video tokenizers](https://github.com/NVIDIA/Cosmos-Tokenizer) for tokenizing videos into continuous tokens (latent vectors) and discrete tokens (integers) efficiently and effectively.
-- [Post-training scripts](cosmos1/models/post_training/README.md) to post-train the pre-trained world foundation models for various Physical AI setup.
 - Video curation pipeline for building your own video dataset. [Coming soon]
-- Training scripts for building your own world foundation model. [[Diffusion](https://github.com/NVIDIA/NeMo/tree/main/nemo/collections/diffusion)] [[Autoregressive](https://github.com/NVIDIA/NeMo/tree/main/nemo/collections/multimodal_autoregressive)].
+- [Post-training scripts](cosmos1/models/POST_TRAINING.md) via NeMo Framework to post-train the pre-trained world foundation models for various Physical AI setup.
+- Pre-training scripts via NeMo Framework for building your own world foundation model. [[Diffusion](https://github.com/NVIDIA/NeMo/tree/main/nemo/collections/diffusion)] [[Autoregressive](https://github.com/NVIDIA/NeMo/tree/main/nemo/collections/multimodal_autoregressive)] [[Tokenizer](https://github.com/NVIDIA/NeMo/tree/main/nemo/collections/diffusion/vae)].
 
 ## Model Family
 
@@ -36,13 +36,12 @@ Details of the platform is described in the [Cosmos paper](https://research.nvid
 
 ## Example Usage
 
-
 ## Gradio demo
 
 [After installation](INSTALL.md) you can run local Gradio demo:
 
 ```python
-CUDA_VISIBLE_DEVICES=0 python cosmos1/models/diffusion/gradio_demo.py 
+CUDA_VISIBLE_DEVICES=0 python cosmos1/models/diffusion/gradio_demo.py
 ```
 
 ### Inference
@@ -68,14 +67,15 @@ PYTHONPATH=$(pwd) python cosmos1/models/diffusion/inference/text2world.py \
     --video_save_name Cosmos-1.0-Diffusion-7B-Text2World
 ```
 
-
-<video src="https://github.com/user-attachments/assets/d3ce56ad-ed6c-445b-a67a-62487e9c32ce">
+<video src="https://github.com/user-attachments/assets/db7bebfe-5314-40a6-b045-4f6ce0a87f2a">
   Your browser does not support the video tag.
 </video>
 
-### Fine-tuning
+We also offer [multi-GPU inference](cosmos1/models/diffusion/nemo/inference/README.md) support for Diffusion Text2World WFM models through NeMo Framework.
 
-Check out [Cosmos Post-training](cosmos1/models/post_training/README.md) for more details.
+### Post-training
+
+NeMo Framework provides GPU accelerated post-training with general post-training for both [diffusion](cosmos1/models/diffusion/nemo/post_training/README.md) and [autoregressive](cosmos1/models/autoregressive/nemo/post_training/README.md) models, with other types of post-training coming soon.
 
 ## License and Contact
 
