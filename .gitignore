@@ -21,15 +21,11 @@ checkpoints/*
 # Data types
 *.jit
 *.pt
-*.png
 *.hdr
-*.jpg
-*.jpeg
 *.webp
 *.pgm
 *.tiff
 *.tif
-*.mp4
 *.tar
 *.tar.gz
 *.gz

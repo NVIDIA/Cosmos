@@ -31,7 +31,7 @@ def chat_completion(
     model: AutoRegressiveModel,
     dialogs: List,
     seed: int = None,
-    temperature: float = 0.6,
+    temperature: float = 0.01,
     top_k: int = None,
     top_p: float = None,
     max_gen_len: Optional[int] = None,
@@ -50,7 +50,7 @@ def chat_completion(
         model (AutoRegressiveModel): The language generation model.
         dialogs (List): List of conversational dialogs, where each dialog is a list of messages.
             NOTE if you are using a VLM, all dialogs must either all have images ("image" field) or all be pure text.
-        temperature (float, optional): Temperature value for controlling randomness in sampling. Defaults to 0.6.
+        temperature (float, optional): Temperature value for controlling randomness in sampling. Defaults to 0.01.
         top_k (int, optional): Top-k probability threshold for nucleus sampling. Defaults to None. If not None, top-p sampling is ignored.
         top_p (float, optional): Top-p probability threshold for nucleus sampling. Defaults to None. If not None, top-k sampling is ignored.
         max_gen_len (Optional[int], optional): Maximum length of the generated response sequence.

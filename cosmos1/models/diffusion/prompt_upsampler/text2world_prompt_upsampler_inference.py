@@ -21,6 +21,7 @@ Command:
 """
 import argparse
 import os
+import re
 
 from cosmos1.models.autoregressive.configs.base.model_config import create_text_model_config
 from cosmos1.models.autoregressive.model import AutoRegressiveModel
@@ -69,14 +70,51 @@ def run_chat_completion(model: AutoRegressiveModel, input: str, temperature: flo
         top_k=None,
         logprobs=False,
     )
-    upsampled_prompt = str(results[0]["generation"]["content"])
+    upsampled_prompt = str(clean_text(results[0]["generation"]["content"]))
     return upsampled_prompt
+
+
+def clean_text(text: str) -> str:
+    """Clean the text by removing prefixes, suffixes, formatting markers, and normalizing whitespace."""
+    # Replace all variations of newlines with a space
+    text = text.replace("\n", " ").replace("\r", " ")
+
+    # Use a regex to find sections of the form '- **...**'
+    pattern = r"(- \*\*)(.*?)(\*\*)"
+
+    def replacement(match: re.Match[str]) -> str:
+        content = match.group(2)  # The text inside - ** and **
+        words = re.findall(r"\w+", content)
+        if len(words) < 10:
+            # If fewer than 10 words, remove the entire '- **...**' portion
+            return ""
+        else:
+            # If 10 or more words, keep the entire section as it is
+            return match.group(0)
+
+    text = re.sub(pattern, replacement, text)
+
+    # Remove common prefixes
+    prefixes = ["Caption:", "#####", "####", "- ", "* ", ","]
+    for prefix in prefixes:
+        # lstrip(prefix) won't strip entire strings, but character sets.
+        # For more reliable prefix removal, do:
+        if text.startswith(prefix):
+            text = text[len(prefix) :].lstrip()
+
+    # Remove extra spaces
+    text = " ".join(text.split())
+
+    # Strip any remaining leading/trailing punctuation, whitespace, and quotes
+    text = text.strip(' -,*:"\'"“”')
+
+    return text
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Run prompt upsampler inference")
     parser.add_argument("--input", type=str, default="A dog is playing with a ball.")
-    parser.add_argument("--temperature", type=float, default=0.0, help="Inference temperature")
+    parser.add_argument("--temperature", type=float, default=0.01, help="Inference temperature")
     parser.add_argument(
         "--checkpoint_dir", type=str, default="checkpoints", help="Base directory containing model checkpoints"
     )

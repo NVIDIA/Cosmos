@@ -183,7 +183,7 @@ PYTHONPATH=$(pwd) python cosmos1/models/diffusion/inference/text2world.py \
 
 Here is an example output video generated using text2world.py:
 
-<video src="https://github.com/user-attachments/assets/d3ce56ad-ed6c-445b-a67a-62487e9c32ce">
+<video src="https://github.com/user-attachments/assets/db7bebfe-5314-40a6-b045-4f6ce0a87f2a">
   Your browser does not support the video tag.
 </video>
 
