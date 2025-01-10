@@ -31,10 +31,13 @@ def read_prompts_from_file(prompt_file: str) -> List[Dict[str, str]]:
         List[Dict[str, str]]: List of prompt dictionaries
     """
     prompts = []
-    with open(prompt_file, "r") as f:
-        for line in f:
-            prompt_dict = json.loads(line.strip())
-            prompts.append(prompt_dict)
+    try:
+        with open(prompt_file, "r") as f:
+            for line in f:
+                prompt_dict = json.loads(line.strip())
+                prompts.append(prompt_dict)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        raise ValueError(f"Error reading prompts file: {e}")
     return prompts
 
 
