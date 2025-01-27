@@ -126,7 +126,7 @@ class TextTokenizer:
             add_special_tokens (`bool`, *optional*, defaults to `True`):
                 Whether or not to add special tokens when encoding the sequences. This will use the underlying
                 `PretrainedTokenizerBase.build_inputs_with_special_tokens` function, which defines which tokens are
-                automatically added to the input ids. This is usefull if you want to add `bos` or `eos` tokens
+                automatically added to the input ids. This is useful if you want to add `bos` or `eos` tokens
                 automatically.
             padding (`bool`, `str`, *optional*, defaults to `False`):
                 Activates and controls padding. Accepts the following values:
