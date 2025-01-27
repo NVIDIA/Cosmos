@@ -131,7 +131,7 @@ Executing the [data preprocessing script](./prepare_dataset.py) generates the fo
 
 ### 3. Post-train the Model
 
-The third step is to post-train the model. This step uses NeMo Framework's data and model parallelism capabilities to train the model on the post-training samples. This is accomplished by using utilizing Fully Sharded Data Parallel (FSDP) and Tensor Parallelism.
+The third step is to post-train the model. This step uses NeMo Framework's data and model parallelism capabilities to train the model on the post-training samples. This is accomplished by utilizing Fully Sharded Data Parallel (FSDP) and Tensor Parallelism.
 
 - **FSDP**: Distributes model parameters, optimizer states, and activations across all GPUs
 - **Tensor Parallelism**: Spreads the parameter tensor of individual layers across GPUs.
