@@ -150,7 +150,7 @@ Complete the following steps to post-train the Cosmos-1.0-Diffusion-7B-Text2Worl
 
    # Optionally, you can monitor training progress with Weights and Biases (wandb).
    export WANDB_API_KEY="</your/wandb/api/key>"
-   export WANDB_PROJECT_NAME="cosmos-diffusion-nemo-post-training"
+   export WANDB_PROJECT="cosmos-diffusion-nemo-post-training"
    export WANDB_RUN_ID="cosmos_diffusion_7b_text2world_finetune"
    ```
 2. Run the following command for Cosmos-Diffusion-Text2World-7B general post-training:
