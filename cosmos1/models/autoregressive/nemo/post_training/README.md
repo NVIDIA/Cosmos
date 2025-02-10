@@ -147,7 +147,7 @@ Complete the following steps to post-train the Cosmos-1.0-Autoregressive-4B mode
 
    # Optionally, you can monitor training progress with Weights and Biases (wandb).
    export WANDB_API_KEY="</your/wandb/api/key>"
-   export WANDB_PROJECT_NAME="cosmos-autoregressive-nemo-finetuning"
+   export WANDB_PROJECT="cosmos-autoregressive-nemo-finetuning"
    export WANDB_RUN_ID="cosmos_autoregressive_4b_finetune"
    ```
 2. Run the following command for Cosmos-1.0-Autoregressive-4B post-training:
