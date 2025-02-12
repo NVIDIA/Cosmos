@@ -30,4 +30,4 @@ pillow
 pytorch_retinaface @ git+https://github.com/NVlabs/Pytorch_Retinaface.git@b843f45
 sentencepiece
 termcolor
-transformers==4.45.0
+transformers==4.48.0
