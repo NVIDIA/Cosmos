@@ -49,12 +49,12 @@ _LEGACY_NUM_GROUPS = 32
 
 class CausalConv3d(nn.Module):
     def __init__(
-        self,
-        chan_in: int = 1,
-        chan_out: int = 1,
-        kernel_size: Union[int, Tuple[int, int, int]] = 3,
-        pad_mode: str = "constant",
-        **kwargs,
+            self,
+            chan_in: int = 1,
+            chan_out: int = 1,
+            kernel_size: Union[int, Tuple[int, int, int]] = 3,
+            pad_mode: str = "constant",
+            **kwargs,
     ):
         super().__init__()
         kernel_size = cast_tuple(kernel_size, 3)
@@ -112,7 +112,7 @@ class CausalUpsample3d(nn.Module):
         # Shoule reverse the order of the following two ops,
         # better perf and better temporal smoothness.
         x = self.conv(x)
-        return x[..., int(time_factor - 1) :, :, :]
+        return x[..., int(time_factor - 1):, :, :]
 
 
 class CausalDownsample3d(nn.Module):
@@ -137,11 +137,11 @@ class CausalDownsample3d(nn.Module):
 
 class CausalHybridUpsample3d(nn.Module):
     def __init__(
-        self,
-        in_channels: int,
-        spatial_up: bool = True,
-        temporal_up: bool = True,
-        **kwargs,
+            self,
+            in_channels: int,
+            spatial_up: bool = True,
+            temporal_up: bool = True,
+            **kwargs,
     ) -> None:
         super().__init__()
         self.conv1 = CausalConv3d(
@@ -181,7 +181,7 @@ class CausalHybridUpsample3d(nn.Module):
             if isinstance(time_factor, torch.Tensor):
                 time_factor = time_factor.item()
             x = x.repeat_interleave(int(time_factor), dim=2)
-            x = x[..., int(time_factor - 1) :, :, :]
+            x = x[..., int(time_factor - 1):, :, :]
             x = self.conv1(x) + x
 
         # hybrid upsample spatially.
@@ -196,11 +196,11 @@ class CausalHybridUpsample3d(nn.Module):
 
 class CausalHybridDownsample3d(nn.Module):
     def __init__(
-        self,
-        in_channels: int,
-        spatial_down: bool = True,
-        temporal_down: bool = True,
-        **kwargs,
+            self,
+            in_channels: int,
+            spatial_down: bool = True,
+            temporal_down: bool = True,
+            **kwargs,
     ) -> None:
         super().__init__()
         self.conv1 = CausalConv3d(
@@ -256,12 +256,12 @@ class CausalHybridDownsample3d(nn.Module):
 
 class CausalResnetBlock3d(nn.Module):
     def __init__(
-        self,
-        *,
-        in_channels: int,
-        out_channels: int = None,
-        dropout: float,
-        num_groups: int,
+            self,
+            *,
+            in_channels: int,
+            out_channels: int = None,
+            dropout: float,
+            num_groups: int,
     ) -> None:
         super().__init__()
         self.in_channels = in_channels
@@ -295,12 +295,12 @@ class CausalResnetBlock3d(nn.Module):
 
 class CausalResnetBlockFactorized3d(nn.Module):
     def __init__(
-        self,
-        *,
-        in_channels: int,
-        out_channels: int = None,
-        dropout: float,
-        num_groups: int,
+            self,
+            *,
+            in_channels: int,
+            out_channels: int = None,
+            dropout: float,
+            num_groups: int,
     ) -> None:
         super().__init__()
         self.in_channels = in_channels
@@ -449,16 +449,16 @@ class CausalTemporalAttnBlock(nn.Module):
 
 class EncoderBase(nn.Module):
     def __init__(
-        self,
-        in_channels: int,
-        channels: int,
-        channels_mult: list[int],
-        num_res_blocks: int,
-        attn_resolutions: list[int],
-        dropout: float,
-        resolution: int,
-        z_channels: int,
-        **ignore_kwargs,
+            self,
+            in_channels: int,
+            channels: int,
+            channels_mult: list[int],
+            num_res_blocks: int,
+            attn_resolutions: list[int],
+            dropout: float,
+            resolution: int,
+            z_channels: int,
+            **ignore_kwargs,
     ) -> None:
         super().__init__()
         self.num_resolutions = len(channels_mult)
@@ -571,16 +571,16 @@ class EncoderBase(nn.Module):
 
 class DecoderBase(nn.Module):
     def __init__(
-        self,
-        out_channels: int,
-        channels: int,
-        channels_mult: list[int],
-        num_res_blocks: int,
-        attn_resolutions: list[int],
-        dropout: float,
-        resolution: int,
-        z_channels: int,
-        **ignore_kwargs,
+            self,
+            out_channels: int,
+            channels: int,
+            channels_mult: list[int],
+            num_res_blocks: int,
+            attn_resolutions: list[int],
+            dropout: float,
+            resolution: int,
+            z_channels: int,
+            **ignore_kwargs,
     ):
         super().__init__()
         self.num_resolutions = len(channels_mult)
@@ -677,7 +677,7 @@ class DecoderBase(nn.Module):
                 if isinstance(time_factor, torch.Tensor):
                     time_factor = time_factor.item()
                 h = h.repeat_interleave(int(time_factor), dim=2)
-                h = h[..., int(time_factor - 1) :, :, :]
+                h = h[..., int(time_factor - 1):, :, :]
 
         h = self.norm_out(h)
         h = nonlinearity(h)
@@ -688,18 +688,18 @@ class DecoderBase(nn.Module):
 
 class EncoderFactorized(nn.Module):
     def __init__(
-        self,
-        in_channels: int,
-        channels: int,
-        channels_mult: list[int],
-        num_res_blocks: int,
-        attn_resolutions: list[int],
-        dropout: float,
-        resolution: int,
-        z_channels: int,
-        spatial_compression: int = 16,
-        temporal_compression: int = 8,
-        **ignore_kwargs,
+            self,
+            in_channels: int,
+            channels: int,
+            channels_mult: list[int],
+            num_res_blocks: int,
+            attn_resolutions: list[int],
+            dropout: float,
+            resolution: int,
+            z_channels: int,
+            spatial_compression: int = 16,
+            temporal_compression: int = 8,
+            **ignore_kwargs,
     ) -> None:
         super().__init__()
         self.num_resolutions = len(channels_mult)
@@ -713,13 +713,13 @@ class EncoderFactorized(nn.Module):
         # calculate the number of downsample operations
         self.num_spatial_downs = int(math.log2(spatial_compression)) - int(math.log2(patch_size))
         assert (
-            self.num_spatial_downs <= self.num_resolutions
-        ), f"Spatially downsample {self.num_resolutions} times at most"
+                self.num_spatial_downs <= (self.num_resolutions - 1)
+        ), f"Spatially downsample {self.num_resolutions - 1} times at most"
 
         self.num_temporal_downs = int(math.log2(temporal_compression)) - int(math.log2(patch_size))
         assert (
-            self.num_temporal_downs <= self.num_resolutions
-        ), f"Temporally downsample {self.num_resolutions} times at most"
+                self.num_temporal_downs <= (self.num_resolutions - 1)
+        ), f"Temporally downsample {self.num_resolutions - 1} times at most"
 
         # downsampling
         self.conv_in = nn.Sequential(
@@ -770,7 +770,8 @@ class EncoderFactorized(nn.Module):
                     spatial_down=spatial_down,
                     temporal_down=temporal_down,
                 )
-                curr_res = curr_res // 2
+                if spatial_down:
+                    curr_res = curr_res // 2
             self.down.append(down)
 
         # middle
@@ -834,18 +835,18 @@ class EncoderFactorized(nn.Module):
 
 class DecoderFactorized(nn.Module):
     def __init__(
-        self,
-        out_channels: int,
-        channels: int,
-        channels_mult: list[int],
-        num_res_blocks: int,
-        attn_resolutions: list[int],
-        dropout: float,
-        resolution: int,
-        z_channels: int,
-        spatial_compression: int = 16,
-        temporal_compression: int = 8,
-        **ignore_kwargs,
+            self,
+            out_channels: int,
+            channels: int,
+            channels_mult: list[int],
+            num_res_blocks: int,
+            attn_resolutions: list[int],
+            dropout: float,
+            resolution: int,
+            z_channels: int,
+            spatial_compression: int = 16,
+            temporal_compression: int = 8,
+            **ignore_kwargs,
     ):
         super().__init__()
         self.num_resolutions = len(channels_mult)
@@ -861,7 +862,7 @@ class DecoderFactorized(nn.Module):
         assert self.num_spatial_ups <= self.num_resolutions, f"Spatially upsample {self.num_resolutions} times at most"
         self.num_temporal_ups = int(math.log2(temporal_compression)) - int(math.log2(patch_size))
         assert (
-            self.num_temporal_ups <= self.num_resolutions
+                self.num_temporal_ups <= self.num_resolutions
         ), f"Temporally upsample {self.num_resolutions} times at most"
 
         block_in = channels * channels_mult[self.num_resolutions - 1]
@@ -932,7 +933,7 @@ class DecoderFactorized(nn.Module):
                 else:
                     temporal_up = 0 < i_level_reverse < self.num_temporal_ups + 1
                 spatial_up = temporal_up or (
-                    i_level_reverse < self.num_spatial_ups and self.num_spatial_ups > self.num_temporal_ups
+                        i_level_reverse < self.num_spatial_ups and self.num_spatial_ups > self.num_temporal_ups
                 )
                 up.upsample = CausalHybridUpsample3d(block_in, spatial_up=spatial_up, temporal_up=temporal_up)
                 curr_res = curr_res * 2
