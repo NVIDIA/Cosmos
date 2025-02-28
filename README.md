@@ -34,6 +34,10 @@ Details of the platform is described in the [Cosmos paper](https://research.nvid
 | [Cosmos-1.0-Autoregressive-13B-Video2World](https://huggingface.co/nvidia/Cosmos-1.0-Autoregressive-13B-Video2World) | Video + Text based future visual world generation | [Inference](cosmos1/models/autoregressive/README.md)   |
 | [Cosmos-1.0-Guardrail](https://huggingface.co/nvidia/Cosmos-1.0-Guardrail) | Guardrail contains pre-Guard and post-Guard for safe use | Embedded in model inference scripts |
 
+## Supported Architectures
+
+Cosmos only supports GPUs based on the Ampere, Hopper, Ada Lovelace, and Blackwell architectures. Other architectures are not supported.
+
 ## Example Usage
 
 ### Inference
