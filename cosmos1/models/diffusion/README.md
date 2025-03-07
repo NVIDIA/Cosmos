@@ -40,9 +40,12 @@ huggingface-cli login
 4. Download the Cosmos model weights from [Hugging Face](https://huggingface.co/collections/nvidia/cosmos-6751e884dc10e013a0a0d8e6):
 
 ```bash
-PYTHONPATH=$(pwd) python cosmos1/scripts/download_diffusion.py --model_sizes 7B 14B --model_types Text2World Video2World
+PYTHONPATH=$(pwd) python cosmos1/scripts/download_diffusion.py --model_sizes 7B --model_types Text2World Video2World
 ```
-
+If you would like to use the 14B model as well, run the following command:
+```bash
+PYTHONPATH=$(pwd) python cosmos1/scripts/download_diffusion.py --model_sizes 14B --model_types Text2World Video2World
+```
 5. The downloaded files should be in the following structure:
 
 ```
