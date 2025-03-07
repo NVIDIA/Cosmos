@@ -7,7 +7,7 @@ We have only tested the installation with Ubuntu 24.04, 22.04, and 20.04.
 2. Clone the repository.
 
 ```bash
-git clone git@github.com:NVIDIA/Cosmos.git
+git clone https://github.com/NVIDIA/Cosmos.git
 cd Cosmos
 ```
 
