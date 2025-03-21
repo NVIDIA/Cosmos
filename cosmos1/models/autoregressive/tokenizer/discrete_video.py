@@ -20,7 +20,7 @@ from einops import rearrange
 
 from cosmos1.models.autoregressive.tokenizer.quantizers import FSQuantizer
 
-# Make sure jit model output consistenly during consecutive calls
+# Make sure jit model output consistently during consecutive calls
 # Check here: https://github.com/pytorch/pytorch/issues/74534
 torch._C._jit_set_texpr_fuser_enabled(False)
 
@@ -34,7 +34,7 @@ def load_jit_model(jit_filepath: str = None, device: str = "cuda") -> torch.jit.
     Returns:
         The JIT compiled model loaded to device and on eval mode.
     """
-    # Make sure jit model output consistenly during consecutive calls
+    # Make sure jit model output consistently during consecutive calls
     # Check here: https://github.com/pytorch/pytorch/issues/74534
     torch._C._jit_set_texpr_fuser_enabled(False)
 

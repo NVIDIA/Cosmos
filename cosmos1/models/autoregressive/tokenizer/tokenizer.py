@@ -246,7 +246,7 @@ class DiscreteMultimodalTokenizer:
                 max_visual_seq_len = max_visual_seq_len
             assert (
                 max_visual_seq_len <= self.total_seq_len
-            ), f"max_visual_seq_len ({max_visual_seq_len}) is greater that total sequence length ({self.total_seq_len})"
+            ), f"max_visual_seq_len ({max_visual_seq_len}) is greater than total sequence length ({self.total_seq_len})"
             max_text_seq_len = self.total_seq_len - max_visual_seq_len
 
         # Tokenize the text
