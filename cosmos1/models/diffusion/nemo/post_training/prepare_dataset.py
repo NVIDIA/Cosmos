@@ -127,7 +127,7 @@ def main(args):
     vae = init_video_tokenizer(args.tokenizer_dir)
 
     # Constants
-    t5_embeding_max_length = 512
+    t5_embedding_max_length = 512
     chunk_duration = vae.video_vae.pixel_chunk_duration  # Frames per chunk
     cnt = 0  # File index
 
@@ -182,9 +182,9 @@ def main(args):
                 out = encode_for_batch(tokenizer, text_encoder, [args.prompt])[0]
                 encoded_text = torch.tensor(out, dtype=torch.bfloat16)
 
-                # Pad T5 embedding to t5_embeding_max_length
+                # Pad T5 embedding to t5_embedding_max_length
                 L, C_ = encoded_text.shape
-                t5_embed = torch.zeros(1, t5_embeding_max_length, C_, dtype=torch.bfloat16)
+                t5_embed = torch.zeros(1, t5_embedding_max_length, C_, dtype=torch.bfloat16)
                 t5_embed[0, :L] = encoded_text
 
                 # Save data to folder
