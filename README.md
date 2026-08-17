@@ -87,6 +87,7 @@ This repository is the home of the models: everything for exploring, running, an
   <tr><td><b>Explore runnable notebooks</b></td><td><a href="cookbooks/cosmos3/README.md">Cookbooks</a></td><td>browse</td></tr>
   <tr><td><b>Evaluate a model</b></td><td><a href="evaluation/">Evaluation suites</a> — PAIBench, Physics-IQ, VLMEvalKit</td><td>hours</td></tr>
   <tr><td><b>Check latency &amp; throughput</b></td><td><a href="inference_benchmarks.md">Benchmarks</a></td><td>browse</td></tr>
+  <tr><td><b>Run Cosmos3-Edge on device</b></td><td><a href="cookbooks/cosmos3/reasoner/run_with_trt_edge_llm.ipynb">Reasoner</a> and <a href="cookbooks/cosmos3/generator/action/run_policy_with_trt_edge_llm.ipynb">policy</a> with TensorRT-Edge-LLM</td><td>setup</td></tr>
 </table>
 
 ## Generate your first video
@@ -164,7 +165,7 @@ Training, optimization, and deployment tooling lives in [Cosmos Framework](https
 | [Cosmos Curator](https://github.com/NVIDIA/cosmos-curator) | Distributed data curation: processing, annotation, filtering, dedup |
 | [Cosmos Evaluator](https://github.com/NVIDIA/cosmos-evaluator) | Automated evaluation system for world generation & reasoning outputs |
 
-Cosmos 3 runs on Diffusers, Transformers, vLLM, vLLM-Omni, SGLang, TensorRT-LLM, and NIM — pick a backend in the [environment setup guide](cookbooks/cosmos3/README.md).
+Cosmos 3 runs on Diffusers, Transformers, vLLM, vLLM-Omni, SGLang, TensorRT-LLM, TensorRT-Edge-LLM, and NIM — pick a backend in the [environment setup guide](cookbooks/cosmos3/README.md).
 
 ## Community & contributing
 
