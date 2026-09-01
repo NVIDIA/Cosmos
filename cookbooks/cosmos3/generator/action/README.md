@@ -310,9 +310,11 @@ serving. Multimodal reasoning on the same Edge-LLM runtime is documented in
 ### Notebook walkthrough
 
 [`run_policy_with_trt_edge_llm.ipynb`](./run_policy_with_trt_edge_llm.ipynb)
-runs a single-image policy request (cookbook observation + task prompt) and
-writes `action.json` (`[batch, chunk, action_dimension]`). Optional
-`--steps` / `--seed` match the upstream VLA guide.
+builds the same 640×540 DROID `concat_view` as the vLLM-Omni / SGLang policy
+notebooks (from `assets/droid_lerobot_example`), runs
+`cosmos3_policy_inference`, and writes `action.json`
+(`[batch, chunk, action_dimension]`). Optional `--steps` / `--seed` match the
+upstream VLA guide.
 
 ## Post-Train for Cosmos3-Nano-Policy-DROID
 
