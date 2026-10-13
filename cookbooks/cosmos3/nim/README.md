@@ -18,6 +18,20 @@ contains two runtimes, but each container runs only one:
 > establishes a candidate configuration, while cold start and representative
 > requests establish host and workload compatibility.
 
+## Architecture
+
+Cosmos3 is a Mixture-of-Transformers (MoT) world foundation model with two
+cooperating towers that share latent representations and are trained jointly: a
+**Reasoner** (vision-language) tower that grounds the prompt in the visual
+concept space, and a **Generator** (world simulator) tower that produces the
+output modality, such as video. The NIM image contains both runtimes, and each
+container runs one of them: the Generator path uses the Reasoner tower to
+understand the input and the Generator tower to produce the output, while the
+Reasoner path serves understanding. For details, see the
+[Cosmos3 technical report](https://research.nvidia.com/labs/cosmos-lab/cosmos3/technical-report.pdf).
+
+![Cosmos3 Mixture-of-Transformers architecture with Reasoner and Generator towers](../cosmos3-model-architecture.png)
+
 ## Choose what to run
 
 Normal deployment does not require choosing a profile ID. Make a few
