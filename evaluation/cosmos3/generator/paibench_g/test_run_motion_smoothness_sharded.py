@@ -6,6 +6,7 @@ versions. These tests run without GPU, AMT-S, or the scorer checkout.
 
 import hashlib
 import json
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -62,6 +63,7 @@ class HashHelpersTest(unittest.TestCase):
             self.assertEqual(result["status"], "missing")
             self.assertIsNone(result["sha256"])
 
+    @unittest.skipUnless(shutil.which("git"), "git is required")
     def test_git_head_and_status_hash(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp) / "scorer"
@@ -78,6 +80,7 @@ class HashHelpersTest(unittest.TestCase):
             self.assertNotEqual(before, after)
 
 
+@unittest.skipUnless(shutil.which("git"), "git is required")
 class ManifestTest(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
@@ -148,3 +151,43 @@ class ManifestTest(unittest.TestCase):
         )
         with self.assertRaisesRegex(RuntimeError, "evaluator identity mismatch"):
             runner.prepare_manifest(out, result, self._manifest())
+
+
+class DegradationTest(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.tmp = Path(self._tmp.name)
+        # NOT a git repo, no freeze file
+        self.scorer = self.tmp / "plain_scorer"
+        self.scorer.mkdir()
+        self.videos = [self.tmp / "v0.mp4"]
+        self.videos[0].write_bytes(b"fake-mp4")
+        # isolated patch dir copy for the test, not the real repo
+        self.patches = self.tmp / "patches"
+        self.patches.mkdir()
+        # file_identity() stats config/checkpoint, so they must exist
+        (self.tmp / "cfg.yaml").write_text("cfg\n")
+        (self.tmp / "ckpt.pt").write_bytes(b"ckpt")
+
+    def test_identity_unavailable_without_git(self):
+        ident = runner.build_evaluator_identity(self.scorer)
+        self.assertEqual(ident["scorer_source"]["status"], "unavailable")
+        self.assertEqual(ident["scorer_environment"]["status"], "missing")
+
+    def test_prepare_manifest_tolerates_unavailable_identity(self):
+        out = self.tmp / "out"
+        out.mkdir()
+        result = self.tmp / "result.json"
+        manifest = runner.build_manifest(
+            task="t2v",
+            model_name="model",
+            videos=self.videos,
+            evaluator_root=self.scorer,
+            config=self.tmp / "cfg.yaml",
+            checkpoint=self.tmp / "ckpt.pt",
+            patches_dir=self.patches,
+        )
+        # must NOT raise: soft degradation keeps the old baseline behavior
+        runner.prepare_manifest(out, result, manifest)
+        self.assertTrue((out / "manifest.json").exists())
