@@ -58,11 +58,13 @@ Guide the customer through the canonical pages in this order:
    Transfer eligibility.
 3. `deployment.md` for the exact image, authentication, pre-download profile
    preflight, cache, runtime selector, launch, readiness, logs, and cleanup.
+   For Kubernetes, use `helm.md` for the chart, secrets, values file, and
+   verification.
 4. `configuration.md` only when a documented non-default setting is needed.
 5. The existing-endpoint preflight above before the first inference request.
 
-Use only the exact image and commands in `deployment.md`; never substitute
-`latest`. After the image pull, run the documented pre-download profile
+Use only the exact image and commands in `deployment.md` or, for Kubernetes,
+`helm.md`; never substitute `latest`. After the image pull, run the documented pre-download profile
 preflight with the intended selectors and GPUs. For a Reasoner on DGX Spark/GB10
 or Jetson AGX Thor, every preflight and launch command shown to the customer,
 starting with the first one, must include

@@ -67,7 +67,7 @@ model:
   nimCache: /opt/nim/.cache
 persistence:
   enabled: true
-  size: 200Gi
+  size: 220Gi
 sharedMemory:
   sizeLimit: 16Gi
 resources:
@@ -87,12 +87,12 @@ Adjust it for the chosen configuration:
 - **Model and GPUs:** Change `NIM_MODEL_VARIANT`, `NIM_PERF_PROFILE`, and
   `nvidia.com/gpu` together using the
   [Generator configurations](support-matrix.md#generator-configurations). The
-  GPU count does not select a GPU type; use `nodeSelector`, `affinity`, or
-  `tolerations` to target eligible nodes.
-- **Cache size:** The Nano Generator cache uses about 22 GiB after download
-  and materialization; `200Gi` leaves room for other variants and profile
-  changes. No single floor is published, so size the volume for the selected
-  model with headroom.
+  GPU count does not select a GPU type; use `nodeSelector` or `affinity` to
+  target eligible GPU nodes, and `tolerations` if those nodes are tainted. On
+  nodes with MIG enabled, request the MIG resource instead of
+  `nvidia.com/gpu`, for example `nvidia.com/mig-4g.24gb: 2`.
+- **Cache size:** `220Gi` is a starting size for large model files. Set `persistence.storageClass` if the
+  cluster has no default storage class.
 - **Memory:** A pod memory limit counts as system memory during profile
   selection. Keep any limit at or above the host RAM value of the selected row.
 - **Shared memory:** The chart mounts a memory-backed `emptyDir` at `/dev/shm`
@@ -102,12 +102,18 @@ Adjust it for the chosen configuration:
   `fsGroup: 1000` (`podSecurityContext`). The cache volume must be writable by
   that user; storage that ignores `fsGroup`, such as some NFS exports and
   `hostPath` directories, needs matching ownership.
-- **Chart-owned settings:** Use `model.nimCache`, `model.ngcAPISecret`,
-  `model.apiPort`, `model.grpcPort`, `model.inferenceProtocol`,
-  `model.jsonLogging`, and `model.logLevel` instead of `NIM_CACHE_PATH`,
-  `NGC_API_KEY`, `NIM_HTTP_API_PORT`, `NIM_GRPC_API_PORT`,
-  `NIM_INFERENCE_PROTOCOL`, `NIM_LOGGING_JSONL`, and `NIM_LOG_LEVEL`. Add other
-  [Configuration](configuration.md) variables to `env`.
+
+Set these through chart values rather than `env`:
+
+| Chart value | Replaces |
+| --- | --- |
+| `model.nimCache` | `NIM_CACHE_PATH` |
+| `model.ngcAPISecret` | `NGC_API_KEY` |
+| `model.apiPort` | `NIM_HTTP_API_PORT` |
+| `model.jsonLogging` | `NIM_LOGGING_JSONL` |
+| `model.logLevel` | `NIM_LOG_LEVEL` |
+
+Add other [Configuration](configuration.md) variables to `env`.
 
 To check profile compatibility before a cold download, run the Docker
 [pre-download profile preflight](deployment.md#run-the-pre-download-profile-preflight)
@@ -185,7 +191,10 @@ kubectl get pods -w
 ```
 
 Cold download, materialization, and model load can take much longer than pod
-startup. Send requests only after the pod reports `Ready`.
+startup. Send requests only after the pod reports `Ready`. Kubernetes restarts
+the container if it is not ready within `startupProbe.initialDelaySeconds` plus
+`startupProbe.failureThreshold` × `startupProbe.periodSeconds`; raise
+`failureThreshold` for slow first downloads.
 
 ## Verify
 
@@ -220,10 +229,16 @@ The chart supports these cache options; use only one:
 | Direct NFS | `nfs.enabled: true`, `nfs.server`, `nfs.path` | Mount options cannot be set per pod; an NFS-backed claim is usually a better choice |
 | `hostPath` | `hostPath.enabled: true`, `hostPath.path` | Ties pods to one node and has security implications |
 
+Set `replicaCount` for a fixed number of replicas. With the default
+StatefulSet, you can pre-populate caches by scaling up to the maximum replica
+count once and then scaling down; the retained claims let later scale-ups
+start without a new download.
+
 With `statefulSet.enabled: false` and a `ReadWriteOnce` volume, scaling or
 rolling upgrades beyond one pod are likely to fail. Use a `ReadWriteMany`
 storage class, manually cloned `ReadOnlyMany` volumes of a pre-filled cache,
-or direct NFS. Without persistence, every pod start downloads the model again.
+or direct NFS. Without persistence, the cache is an `emptyDir` and every pod
+start downloads the model again.
 
 ## Troubleshooting
 
