@@ -184,20 +184,20 @@ Point your serving stack at this directory.
 The FP8 output is a **drop-in checkpoint** — the same layout as the bf16 source, plus an
 `hf_quant_config.json` and a `quantization_config` in `transformer/config.json`. A
 Cosmos3-capable server detects the ModelOpt FP8 format automatically. Serve it from a **local
-directory** — either the output produced above, or the published `fp8` revision downloaded
-with `snapshot_download` (pass `--served-model-name` so clients see the usual model id):
+directory** — either the output produced above, or the published `nvidia/Cosmos3-Nano-FP8` / `nvidia/Cosmos3-Super-FP8` checkpoint
+downloaded with `snapshot_download` (pass `--served-model-name` so clients see the usual model id):
 
 ```bash
 # A) the local FP8 output produced above
 vllm serve /path/to/OUTPUT_ROOT/nano-fp8 --served-model-name nvidia/Cosmos3-Nano ...
 
-# B) download the published fp8 revision to a local dir, then serve that dir
+# B) download the published FP8 repo to a local dir, then serve that dir
 python -c "from huggingface_hub import snapshot_download; \
-  snapshot_download('nvidia/Cosmos3-Nano', revision='fp8', local_dir='cosmos3-nano-fp8')"
+  snapshot_download('nvidia/Cosmos3-Nano-FP8', local_dir='cosmos3-nano-fp8')"
 vllm serve cosmos3-nano-fp8 --served-model-name nvidia/Cosmos3-Nano ...
 ```
 
-> The `--revision fp8` flag alone is **not** honored by the vLLM-Omni Cosmos3 pipeline (it
+> Passing the FP8 checkpoint by `--revision` alone is **not** honored by the vLLM-Omni Cosmos3 pipeline (it
 > loads the default revision), so the FP8 weights must be materialized to a local directory
 > first.
 
