@@ -16,7 +16,7 @@ from pathlib import Path
 from statistics import fmean
 
 
-RUNNER_VERSION = 2
+RUNNER_VERSION = 3
 
 
 def parse_args() -> argparse.Namespace:
@@ -171,12 +171,16 @@ def build_manifest(
     evaluator_root: Path,
     config: Path,
     checkpoint: Path,
+    patches_dir: Path | None = None,
 ) -> dict:
     return {
         "runner_version": RUNNER_VERSION,
         "task": task,
         "model_name": model_name,
         "evaluator_root": str(evaluator_root),
+        "evaluator_identity": build_evaluator_identity(
+            evaluator_root, patches_dir=patches_dir
+        ),
         "config": file_identity(config),
         "checkpoint": file_identity(checkpoint),
         "videos": [file_identity(path) for path in videos],
@@ -188,6 +192,12 @@ def prepare_manifest(output_dir: Path, result_file: Path, manifest: dict) -> Non
     worker_files = sorted(output_dir.glob("worker_*.json"))
     if manifest_path.exists():
         previous = json.loads(manifest_path.read_text())
+        if previous.get("evaluator_identity") != manifest["evaluator_identity"]:
+            raise RuntimeError(
+                f"evaluator identity mismatch in {output_dir}; "
+                "use a new output directory or restore the previous "
+                "evaluator checkout/patches/environment"
+            )
         if previous != manifest:
             raise RuntimeError(
                 f"manifest mismatch in {output_dir}; use a new output directory "

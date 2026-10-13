@@ -76,3 +76,75 @@ class HashHelpersTest(unittest.TestCase):
             self.assertEqual(runner.git_head(repo), head)
             after = runner.git_status_hash(repo)
             self.assertNotEqual(before, after)
+
+
+class ManifestTest(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.tmp = Path(self._tmp.name)
+        self.scorer = self.tmp / "scorer"
+        make_git_repo(self.scorer)
+        (self.scorer / "scorer_environment.freeze.txt").write_text("torch==2.5\n")
+        # isolated patch dir copy for the test, not the real repo
+        self.patches = self.tmp / "patches"
+        self.patches.mkdir()
+        (self.patches / "p.patch").write_text("patch-v1\n")
+        self.videos = [self.tmp / "v0.mp4", self.tmp / "v1.mp4"]
+        for v in self.videos:
+            v.write_bytes(b"fake-mp4")
+        # file_identity() stats config/checkpoint, so they must exist
+        (self.tmp / "cfg.yaml").write_text("cfg\n")
+        (self.tmp / "ckpt.pt").write_bytes(b"ckpt")
+
+    def _manifest(self):
+        return runner.build_manifest(
+            task="t2v",
+            model_name="model",
+            videos=self.videos,
+            evaluator_root=self.scorer,
+            config=self.tmp / "cfg.yaml",
+            checkpoint=self.tmp / "ckpt.pt",
+            patches_dir=self.patches,
+        )
+
+    def test_manifest_has_evaluator_identity(self):
+        manifest = self._manifest()
+        self.assertEqual(manifest["runner_version"], 3)
+        ident = manifest["evaluator_identity"]
+        self.assertEqual(ident["scorer_source"]["status"], "ok")
+        self.assertEqual(ident["scorer_patches"]["status"], "ok")
+        self.assertEqual(ident["scorer_environment"]["status"], "ok")
+
+    def test_prepare_manifest_resume_accepts_same_identity(self):
+        out = self.tmp / "out"
+        out.mkdir()
+        result = self.tmp / "result.json"
+        manifest = self._manifest()
+        runner.prepare_manifest(out, result, manifest)
+        # same identity, same videos -> no error (idempotent resume)
+        runner.prepare_manifest(out, result, self._manifest())
+
+    def test_prepare_manifest_rejects_changed_patch(self):
+        out = self.tmp / "out"
+        out.mkdir()
+        result = self.tmp / "result.json"
+        runner.prepare_manifest(out, result, self._manifest())
+        # change a patch -> identity mismatch -> hard fail
+        (self.patches / "p.patch").write_text("patch-v2\n")
+        with self.assertRaisesRegex(RuntimeError, "evaluator identity mismatch"):
+            runner.prepare_manifest(out, result, self._manifest())
+
+    def test_prepare_manifest_rejects_changed_source(self):
+        out = self.tmp / "out"
+        out.mkdir()
+        result = self.tmp / "result.json"
+        runner.prepare_manifest(out, result, self._manifest())
+        # new commit on the scorer -> identity mismatch
+        (self.scorer / "a.txt").write_text("new\n")
+        subprocess.run(["git", "-C", str(self.scorer), "add", "a.txt"], check=True)
+        subprocess.run(
+            ["git", "-C", str(self.scorer), "commit", "-qm", "bump"], check=True
+        )
+        with self.assertRaisesRegex(RuntimeError, "evaluator identity mismatch"):
+            runner.prepare_manifest(out, result, self._manifest())
