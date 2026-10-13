@@ -458,8 +458,8 @@ export ONNX on an x86 host, build TensorRT engines on the target (Jetson
 Thor/Orin, DRIVE, DGX Spark, or an x86 developer build), then run the C++
 inference binaries.
 
-Use [TensorRT-Edge-LLM](https://github.com/NVIDIA/TensorRT-Edge-LLM) **v0.10.0 or
-newer**. Complete the upstream
+Use [TensorRT-Edge-LLM](https://github.com/NVIDIA/TensorRT-Edge-LLM) **v0.11.0**.
+Complete the upstream
 [Installation](https://nvidia.github.io/TensorRT-Edge-LLM/user_guide/getting_started/installation.html)
 guide first (Python export package on the host; C++ runtime on the device).
 
