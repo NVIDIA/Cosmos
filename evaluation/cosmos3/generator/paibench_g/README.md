@@ -29,6 +29,8 @@ the standard PAI-Bench-G result schema used by the final aggregation cell.
 Resume validates the evaluator identity (scorer git checkout, applied
 patches, and environment freeze); an identity change requires a new output
 directory or restoring the previous evaluator before scores can be reused.
+If resume unexpectedly fails, diagnose with
+`git -C <evaluator_root> status --porcelain`.
 
 ## Files
 
