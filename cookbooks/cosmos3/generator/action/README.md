@@ -29,9 +29,10 @@ The rest of this doc shows how to run these modes on selected embodiments direct
 
 ## Overview
 
-Examples are shown across native PyTorch (Cosmos Framework), Diffusers,
-TensorRT-LLM, vLLM-Omni, and TensorRT-Edge-LLM (Edge policy only). Every
-backend uses the sample assets under [`assets/`](./assets) and covers three tasks:
+Examples for native PyTorch (Cosmos Framework), Diffusers, TensorRT-LLM,
+and vLLM-Omni use the sample assets under [`assets/`](./assets) and cover
+the three tasks above. TensorRT-Edge-LLM covers the Edge policy task only,
+with the same sample assets.
 
 Environment setup for all backends is centralized in the shared
 [Cosmos3 cookbooks environment setup](../../README.md) guide; each backend below
