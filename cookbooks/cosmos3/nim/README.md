@@ -189,6 +189,7 @@ pages and examples as their source of truth and default to read-only assistance.
 
 - [Operations and troubleshooting](operations.md)
 - [Release notes](release-notes.md)
+- [License and notices](license.md)
 - [Acknowledgements](acknowledgements/README.md)
 
 ## Safety, license, and notices
@@ -197,8 +198,8 @@ Generator guardrails are enabled by default. Disabling them can remove
 content-policy and face-privacy protections; see
 [Guardrails](operations.md#guardrails).
 
-This cookbook is licensed under the repository
-[LICENSE](../../../LICENSE). The running NIM exposes bundled product license
-information at `/v1/license`. The image also contains product terms, notices,
-component licenses, and the included package-modification source described
+See [License and notices](license.md) for the terms. This cookbook is licensed
+under the repository [LICENSE](../../../LICENSE). The running NIM exposes
+bundled product license information at `/v1/license`. The image also contains
+product terms, notices, component licenses, and the included package-modification source described
 under [Acknowledgements](acknowledgements/README.md).
