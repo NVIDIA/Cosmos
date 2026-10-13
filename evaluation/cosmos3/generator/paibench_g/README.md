@@ -26,6 +26,10 @@ upstream distributed evaluator. Motion smoothness runs separately with the
 same AMT-S implementation, writes resumable per-worker checkpoints, and emits
 the standard PAI-Bench-G result schema used by the final aggregation cell.
 
+Resume validates the evaluator identity (scorer git checkout, applied
+patches, and environment freeze); an identity change requires a new output
+directory or restoring the previous evaluator before scores can be reused.
+
 ## Files
 
 - `run_with_cosmos_framework.ipynb` — main notebook (demos for both tasks + two full-sweep cells).
