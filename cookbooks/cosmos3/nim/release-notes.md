@@ -3,10 +3,11 @@ SPDX-License-Identifier: OpenMDW-1.1 -->
 
 # Cosmos3 Certified NIM release notes
 
-## Initial unified Cosmos3 NIM release
+## 2.0.0: Initial unified Cosmos3 NIM release
 
-This is the first release of the unified Cosmos3 Certified NIM. One container
-image includes both runtime choices:
+This is the first release of the unified Cosmos3 Certified NIM, published as
+`nvcr.io/nim/nvidia/cosmos3:2.0.0`. One container image includes both runtime
+choices:
 
 - **Generator** serves image and video generation, Action, and Transfer through
   `POST /v1/infer`.
