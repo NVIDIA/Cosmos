@@ -120,7 +120,11 @@ def hash_patches(patches_dir: Path | None = None) -> dict:
         return {"sha256": None, "status": "missing"}
     digest = hashlib.sha256()
     for patch in sorted(patches_dir.glob("*.patch")):
-        digest.update(patch.read_bytes())
+        content = patch.read_bytes()
+        # include name and length so different sets of patches cannot collide
+        digest.update(patch.name.encode())
+        digest.update(str(len(content)).encode())
+        digest.update(content)
     return {"sha256": digest.hexdigest(), "status": "ok"}
 
 
@@ -192,7 +196,13 @@ def prepare_manifest(output_dir: Path, result_file: Path, manifest: dict) -> Non
     worker_files = sorted(output_dir.glob("worker_*.json"))
     if manifest_path.exists():
         previous = json.loads(manifest_path.read_text())
-        if previous.get("evaluator_identity") != manifest["evaluator_identity"]:
+        if previous.get("evaluator_identity") is None:
+            raise RuntimeError(
+                f"legacy manifest without evaluator identity in {output_dir}; "
+                f"runner version changed (previous {previous.get('runner_version')}, "
+                f"current {manifest['runner_version']}); use a new output directory"
+            )
+        if previous["evaluator_identity"] != manifest["evaluator_identity"]:
             raise RuntimeError(
                 f"evaluator identity mismatch in {output_dir}; "
                 "use a new output directory or restore the previous "

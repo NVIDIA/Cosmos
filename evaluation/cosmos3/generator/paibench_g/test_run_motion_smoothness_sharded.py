@@ -53,9 +53,32 @@ class HashHelpersTest(unittest.TestCase):
             (patches / "b.patch").write_text("B")
             (patches / "a.patch").write_text("A")
             result = runner.hash_patches(patches_dir=patches)
-            # sorted by name: a.patch, b.patch
-            expected = hashlib.sha256(b"A" + b"B").hexdigest()
+            # sorted by name: a.patch, b.patch; digest includes name+len+content
+            digest = hashlib.sha256()
+            digest.update(b"a.patch")
+            digest.update(b"1")
+            digest.update(b"A")
+            digest.update(b"b.patch")
+            digest.update(b"1")
+            digest.update(b"B")
+            expected = digest.hexdigest()
             self.assertEqual(result, {"sha256": expected, "status": "ok"})
+
+    def test_hash_patches_name_len_prevent_collision(self):
+        # {a:"AB", b:"C"} and {a:"A", b:"BC"} must NOT hash the same
+        with tempfile.TemporaryDirectory() as tmp:
+            p1 = Path(tmp) / "p1"
+            p2 = Path(tmp) / "p2"
+            p1.mkdir()
+            p2.mkdir()
+            (p1 / "a.patch").write_text("AB")
+            (p1 / "b.patch").write_text("C")
+            (p2 / "a.patch").write_text("A")
+            (p2 / "b.patch").write_text("BC")
+            self.assertNotEqual(
+                runner.hash_patches(patches_dir=p1),
+                runner.hash_patches(patches_dir=p2),
+            )
 
     def test_hash_patches_missing(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -151,6 +174,17 @@ class ManifestTest(unittest.TestCase):
         )
         with self.assertRaisesRegex(RuntimeError, "evaluator identity mismatch"):
             runner.prepare_manifest(out, result, self._manifest())
+
+    def test_prepare_manifest_rejects_legacy_manifest(self):
+        out = self.tmp / "out"
+        out.mkdir()
+        result = self.tmp / "result.json"
+        # a pre-#361 manifest has runner_version 2 and no evaluator_identity key
+        legacy = {"runner_version": 2, "task": "t2v"}
+        (out / "manifest.json").write_text(json.dumps(legacy))
+        with self.assertRaisesRegex(RuntimeError, "legacy manifest without evaluator identity"):
+            runner.prepare_manifest(out, result, self._manifest())
+
 
 
 class DegradationTest(unittest.TestCase):
