@@ -52,6 +52,8 @@ SKIP_EVAL=1 bash run_paibench_c.sh
 SKIP_GEN=1 bash run_paibench_c.sh
 ```
 
+Generation is resume-safe: tasks with a valid video are skipped on re-run, and evaluation refuses to score a tree whose video count does not match the requested task set, so a partial run can never be reported as a complete benchmark result.
+
 Alternatively, open `run_with_cosmos_framework.ipynb` for an interactive step-by-step walkthrough
 with inline video previews and metric display.
 

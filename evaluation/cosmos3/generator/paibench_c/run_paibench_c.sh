@@ -722,10 +722,12 @@ _py_for_summary() {
     fi
 }
 
-for _mod in $PAIBENCH_C_MODALITIES; do
-    _videos_parent="$PAIBENCH_C_OUTPUT_ROOT/${_ckpt_slug}/$_mod"
-    _videos_dir="$_videos_parent/videos"
-    _metrics_out="$_videos_parent/metrics.json"
+evaluate_modality() {
+    local _mod="$1"
+    local _videos_parent="$PAIBENCH_C_OUTPUT_ROOT/${_ckpt_slug}/$_mod"
+    local _videos_dir="$_videos_parent/videos"
+    local _metrics_out="$_videos_parent/metrics.json"
+    local _eval_ngpu
     _eval_ngpu="$(int_min "$PAIBENCH_C_NUM_SAMPLES" "$COSMOS3_NUM_GPUS")"
 
     # Verify videos exist before launching torchrun to surface errors early.
@@ -734,9 +736,18 @@ for _mod in $PAIBENCH_C_MODALITIES; do
   Run without SKIP_GEN=1, or point PAIBENCH_C_OUTPUT_ROOT at an existing output tree."
     fi
     _nvideos="$(find "$_videos_dir" -name '*.mp4' | wc -l)"
-    if [[ "$_nvideos" -eq 0 ]]; then
-        die "No .mp4 files found in $_videos_dir
-  Re-run generation (remove SKIP_GEN=1) to produce videos."
+
+    # Evaluation must cover exactly the requested task set — scoring a subset
+    # would silently report the subset metric as the benchmark result.
+    local _expected_tasks
+    if [[ -f "$_videos_parent/input.jsonl" ]]; then
+        _expected_tasks="$(awk 'END{print NR}' "$_videos_parent/input.jsonl")"
+    else
+        _expected_tasks="$PAIBENCH_C_NUM_SAMPLES"
+    fi
+    if [[ "$_nvideos" -ne "$_expected_tasks" ]]; then
+        die "Coverage mismatch for modality=$_mod: found $_nvideos video(s), expected $_expected_tasks.
+  Evaluation refuses to score a partial benchmark. Re-run generation (remove SKIP_GEN=1) to produce the missing videos, or point PAIBENCH_C_OUTPUT_ROOT at the output tree that matches this input set."
     fi
     log "  Found $_nvideos video(s) in $_videos_dir"
 
@@ -772,6 +783,10 @@ m = json.loads(pathlib.Path(os.environ["_mout"]).read_text())
 for k, v in m["global"].items():
     print(f"    {k}: {v:.4f}")
 PY
+}
+
+for _mod in $PAIBENCH_C_MODALITIES; do
+    evaluate_modality "$_mod"
 done
 
 log "=== PAI-Bench-C complete ==="

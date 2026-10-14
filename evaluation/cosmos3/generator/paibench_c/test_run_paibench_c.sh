@@ -41,11 +41,25 @@ assert_contains() { # assert_contains <haystack> <needle> <message>
 
 # Extract one function definition verbatim from the script under test and
 # evaluate it in this shell so the tests run the shipped code, not a copy.
+# Handles both one-line definitions ( ... ; }) and multi-line ones closed by
+# a lone "}" at column zero.
 load_fn() {
     local _fn="$1"
     local _src
-    _src="$(sed -n "/^${_fn}()/,/^}/p" "$SCRIPT_UNDER_TEST")"
-    [[ -n "$_src" ]] || { echo "FAIL: function ${_fn}() not found in $SCRIPT_UNDER_TEST" >&2; exit 1; }
+    _src="$(awk -v fn="^${_fn}[(]" '
+        $0 ~ fn {
+            print
+            if ($0 ~ /}[[:space:]]*$/) { exit }
+            in_body = 1
+            next
+        }
+        in_body {
+            print
+            if ($0 == "}") { exit }
+        }
+    ' "$SCRIPT_UNDER_TEST")"
+    [[ -n "$_src" && "$_src" == *}* ]] \
+        || { echo "FAIL: function ${_fn}() not found in $SCRIPT_UNDER_TEST" >&2; exit 1; }
     eval "$_src"
 }
 
@@ -169,9 +183,83 @@ test_resume_with_no_pending_tasks() {
 }
 
 # ---------------------------------------------------------------------------
+# Scenario 3: evaluation coverage gate — metrics are only computed when the
+# collected video count equals the requested task count in input.jsonl; a
+# partial tree must be rejected instead of silently scored as the benchmark
+# result.
+# ---------------------------------------------------------------------------
+test_evaluation_coverage_gate() {
+    local _tmp; _tmp="$(mktemp -d)"
+    make_stub_env "$_tmp/stub-venv"
+    # Stub eval venv: torchrun writes a metrics.json and succeeds; the real
+    # call never happens when the gate rejects the tree.
+    mkdir -p "$_tmp/eval-venv/bin" "$_tmp/eval-root"
+    cat > "$_tmp/eval-venv/bin/torchrun" <<'STUB'
+#!/usr/bin/env bash
+out=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --output_path) out="$2"; shift 2 ;;
+        *) shift ;;
+    esac
+done
+printf '{"global": {"dummy_metric": 1.0}}\n' > "$out"
+STUB
+    chmod +x "$_tmp/eval-venv/bin/torchrun"
+
+    local _tree="$_tmp/out/Cosmos3-Nano/edge"
+    mkdir -p "$_tree/videos"
+    for i in 0 1 2 3; do
+        printf 'x' > "$_tree/videos/task_000$i.mp4"
+        printf '{"name": "task_000%i"}\n' "$i" >> "$_tree/input.jsonl"
+    done
+
+    load_fn int_min
+    load_fn _py_for_summary
+    load_fn evaluate_modality
+
+    local _rc
+    _run_eval() {
+        PAIBENCH_C_OUTPUT_ROOT="$_tmp/out" \
+        PAIBENCH_C_CHECKPOINT="Cosmos3-Nano" \
+        _ckpt_slug="Cosmos3-Nano" \
+        PAIBENCH_C_NUM_SAMPLES="4" \
+        COSMOS3_NUM_GPUS="2" \
+        COSMOS3_UV_ENV="$_tmp/stub-venv" \
+        PAIBENCH_UV_ENV="$_tmp/eval-venv" \
+        PAIBENCH_EVAL_ROOT="$_tmp/eval-root" \
+        PAIBENCH_C_DATASET_ROOT="$_tmp/dataset" \
+        CUDA_VISIBLE_DEVICES="0,1" \
+        evaluate_modality edge
+    }
+
+    # Case A: full coverage — evaluation runs and reports the metrics.
+    local _rc=0
+    _run_eval >"$_tmp/eval.log" 2>&1 || _rc=$?
+    assert_eq "$_rc" "0" "evaluation with full coverage exits 0"
+    assert_contains "$(cat "$_tmp/eval.log")" "dummy_metric: 1.0000" \
+        "full-coverage evaluation reports the computed metrics"
+
+    # Case B: one video missing — evaluation must refuse to score.
+    rm -f "$_tree/videos/task_0002.mp4" "$_tree/metrics.json"
+    _rc=0
+    ( _run_eval ) >"$_tmp/eval2.log" 2>&1 || _rc=$?
+    assert_eq "$_rc" "9" "partial-coverage evaluation is rejected"
+    assert_contains "$(cat "$_tmp/eval2.log")" "found 3 video(s), expected 4" \
+        "rejection message states the missing coverage"
+    [[ ! -f "$_tmp/out/Cosmos3-Nano/edge/metrics.json" ]] && PASS=$((PASS + 1)) || {
+        FAIL=$((FAIL + 1))
+        echo "FAIL: partial-coverage evaluation must not produce metrics.json"
+    }
+
+    rm -rf "$_tmp"
+}
+
+# ---------------------------------------------------------------------------
 run_tests() {
     test_fresh_run_counts_single_row_shards
     test_resume_with_no_pending_tasks
+    test_evaluation_coverage_gate
     echo
     echo "passed: $PASS  failed: $FAIL"
     [[ "$FAIL" -eq 0 ]]
