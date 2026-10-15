@@ -3,10 +3,17 @@ SPDX-License-Identifier: OpenMDW-1.1 -->
 
 # Cosmos3 Certified NIM license and notices
 
-The Cosmos3 Certified NIM container image and this cookbook are licensed under
-the OpenMDW License Agreement, version 1.1 (OpenMDW-1.1). The cookbook source is
-covered by the repository [LICENSE](../../../LICENSE). The model terms ship
-separately in the image; read them before you deploy.
+The governing download terms for the Cosmos3 Certified NIM are:
+
+- Use of the container is governed by the
+  [NVIDIA Software License](https://github.com/NVIDIA/cuda-python/blob/main/cuda_bindings/LICENSE)
+  and the
+  [Product-Specific Terms for NVIDIA AI Products](https://www.nvidia.com/en-us/agreements/enterprise-software/product-specific-terms-for-ai-products/).
+- Use of the models is governed by
+  [OpenMDW-1.1](https://github.com/OpenMDW/OpenMDW/blob/main/1.1/LICENSE.OpenMDW-1.1).
+
+The cookbook source is covered by the repository [LICENSE](../../../LICENSE).
+Read the terms in the image you deploy before you use it.
 
 ## Where to find the terms
 
