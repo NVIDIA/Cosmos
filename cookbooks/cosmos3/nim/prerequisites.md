@@ -147,6 +147,17 @@ The host requires:
 | Docker Engine | Use a maintained Docker Engine release supported by NVIDIA Container Toolkit |
 | NVIDIA Container Toolkit | Use a maintained release configured for the host driver and Docker Engine |
 
+This release was validated with the following host configuration; these are
+tested versions, not minimum requirements, and other versions supported by
+NVIDIA Container Toolkit are expected to work:
+
+| Component | Validated version |
+| --- | --- |
+| OS, architecture, and GPU | Ubuntu 24.04.5 LTS on `aarch64` with NVIDIA GH200 480GB (96 GB GPU memory) |
+| NVIDIA driver | 595.58.03 |
+| Docker Engine | 27.0.3 |
+| NVIDIA Container Toolkit | 1.20.1 |
+
 The CUDA user-space libraries required by the NIM are provided inside the
 container. The image sets `NVIDIA_DRIVER_CAPABILITIES=compute,utility,video`;
 the `video` capability supplies the NVDEC video-decode libraries used by
