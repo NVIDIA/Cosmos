@@ -194,38 +194,22 @@ allowed public HTTP(S) URL. A data URL preserves the media type and avoids
 shell-specific base64 flags:
 
 ```python
-import base64
-import json
-import mimetypes
-import urllib.request
+import base64, json, urllib.request
 from pathlib import Path
 
-nim_url = "http://localhost:8000"
-image_path = Path(
-    "../generator/audiovisual/assets/images/image2video/car_driving.jpg"
-)
-mime = mimetypes.guess_type(image_path.name)[0] or "image/jpeg"
-image = f"data:{mime};base64,{base64.b64encode(image_path.read_bytes()).decode()}"
-
-request = {
+image = Path("../generator/audiovisual/assets/images/image2video/car_driving.jpg")
+data_url = "data:image/jpeg;base64," + base64.b64encode(image.read_bytes()).decode()
+body = {
     "model_mode": "image2video",
     "prompt": "A car travels along a coastal mountain road with natural motion.",
-    "input_reference": image,
-    "resolution": "720",
-    "num_frames": 189,
-    "fps": 24.0,
+    "input_reference": data_url,
     "seed": 0,
 }
-payload = json.dumps(request).encode()
-http_request = urllib.request.Request(
-    f"{nim_url}/v1/infer",
-    data=payload,
-    headers={"Content-Type": "application/json"},
-    method="POST",
-)
-with urllib.request.urlopen(http_request, timeout=1800) as response:
-    result = json.load(response)
-Path("i2v_car_driving.mp4").write_bytes(base64.b64decode(result["b64_video"]))
+req = urllib.request.Request("http://localhost:8000/v1/infer", json.dumps(body).encode(),
+                             {"Content-Type": "application/json"})
+with urllib.request.urlopen(req, timeout=1800) as resp:
+    video = base64.b64decode(json.load(resp)["b64_video"])
+Path("i2v_car_driving.mp4").write_bytes(video)
 ```
 
 Run the complete editable comparison case:

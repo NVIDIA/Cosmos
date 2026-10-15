@@ -229,21 +229,13 @@ has been validated for the selected deployment.
 
 ### Integrate a policy loop
 
-`POST /v1/infer` is synchronous and stateless; it is not the streaming policy
-server used by the RoboLab workflow in the general Action cookbook. A client
-controls the loop:
-
-1. Capture the current visual observation and checkpoint-required state.
-2. Compose or transform views exactly as required by the checkpoint.
-3. Send one policy request.
-4. Validate the response and apply the checkpoint-specific denormalization and
-   coordinate transforms.
-5. Execute only an approved portion of the returned horizon.
-6. Capture a new observation and replan.
-
-Before physical execution, independently enforce joint/workspace bounds,
-collision constraints, timing limits, emergency stops, and task-specific safety
-checks. A valid API response is not an execution authorization.
+`POST /v1/infer` is stateless and is not the streaming policy server used by
+the RoboLab workflow: call it once per control step with the current
+observation and state, apply the checkpoint's transforms to the returned
+actions, execute only part of the horizon, then replan from a new observation.
+Before physical execution, enforce your own joint and workspace bounds,
+collision checks, timing limits, and emergency stops; a valid response is not
+authorization to execute.
 
 ## Nano-DROID policy
 
