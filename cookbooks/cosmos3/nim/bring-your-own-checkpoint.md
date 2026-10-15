@@ -94,9 +94,9 @@ DFlash by default, also provide a local draft or set `NIM_USE_DFLASH=0` for
 completely local target-only operation.
 
 When DFlash is enabled, Nano and Super Reasoner each need their corresponding
-draft artifact containing `config.json` and `model.safetensors`. The selected
-profile can provide it under the primary model workspace. A separate read-only
-local draft can be supplied through `NIM_DFLASH_MODEL_PATH`; the draft does not
+draft artifact containing `config.json` and `model.safetensors`. With
+`NIM_MODEL_PATH`, the NIM does not download the profile's draft, so supply a
+read-only local draft through `NIM_DFLASH_MODEL_PATH`; the draft does not
 need the target model's tokenizer or processor files:
 
 ```text
@@ -123,8 +123,7 @@ after fine-tuning the Nano Reasoner target, follow the [Model Optimizer DFlash
 training recipe](https://github.com/NVIDIA/Model-Optimizer/blob/main/examples/speculative_decoding/recipes/train_dflash_cosmos3_nano.ipynb).
 
 `NIM_DFLASH_MODEL_PATH` must be an absolute in-container local path and does not
-accept `hf://`. If neither the selected image nor an independent mount supplies
-the required draft, set `NIM_USE_DFLASH=0`.
+accept `hf://`. If no independent draft is mounted, set `NIM_USE_DFLASH=0`.
 
 ### Hugging Face source
 
@@ -142,9 +141,9 @@ The downloaded snapshot is stored under the writable NIM cache.
 
 An `hf://` source requires network materialization, so it cannot be combined
 with `NIM_DISABLE_MODEL_DOWNLOAD=1`. For offline operation, pre-download the
-checkpoint and use an absolute local path instead. If DFlash is enabled, use the
-draft supplied by the selected profile or mount a separate local draft with
-`NIM_DFLASH_MODEL_PATH`; a Hugging Face URI is not accepted for the draft.
+checkpoint and use an absolute local path instead. If DFlash is enabled, mount a
+local draft with `NIM_DFLASH_MODEL_PATH`; a Hugging Face URI is not accepted for
+the draft.
 
 ## Discovery and validation
 

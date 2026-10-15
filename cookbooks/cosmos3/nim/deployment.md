@@ -62,8 +62,8 @@ The software defaults to `latency` when the selector is omitted.
 ### Select a Reasoner model
 
 Set `NIM_MODEL_TYPE=reasoner` and choose `NIM_MODEL_VARIANT=nano` or `super`.
-Reasoner does not use `NIM_PERF_PROFILE`. Nano and Super Reasoner enable their
-bundled DFlash speculative-decoding drafts by default. Set `NIM_USE_DFLASH=0`
+Reasoner rejects `NIM_PERF_PROFILE` with a startup error. Nano and Super
+Reasoner enable their bundled DFlash speculative-decoding drafts by default. Set `NIM_USE_DFLASH=0`
 to run the selected Reasoner target model without DFlash; see
 [Configuration](configuration.md#speculative-decoding).
 

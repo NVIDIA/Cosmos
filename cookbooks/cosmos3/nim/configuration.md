@@ -27,7 +27,8 @@ complete Docker commands.
 | `NIM_PERF_PROFILE` | `latency` | Generator only: choose `latency` or `throughput` |
 
 `NIM_MODEL_VARIANT` selects the checkpoint contract for either runtime.
-Reasoner accepts `nano` or `super` and does not use `NIM_PERF_PROFILE`.
+Reasoner accepts `nano` or `super` and rejects `NIM_PERF_PROFILE`, including
+`profile=` in `NIM_TAGS_SELECTOR`, with a startup error.
 Nano-DROID currently has BF16 profiles only.
 
 The NIM chooses the best compatible profile for these settings and the visible
@@ -84,15 +85,32 @@ Use these only when automatic model selection is not sufficient:
 | `NIM_OFFLOAD_MODE` | Automatic compatible preference | Request `none`, `model`, or `layer` when the selected model provides that mode |
 | `NIM_UNIFIED_MEMORY_HOST_RESERVE_GIB` | `16` | Reserve shared memory for the host before profile selection on integrated GPUs; use a nonnegative binary-GiB value validated for the system |
 | `NIM_GPU_MEMORY_HEADROOM_GIB` | `2` | Reasoner only: reserve this many binary GiB of free memory per discrete GPU during profile selection and runtime sizing |
-| `NIM_TAGS_SELECTOR` | Empty | Filter by comma-separated exact manifest tags |
+| `NIM_TAGS_SELECTOR` | Empty | Filter by comma-separated exact manifest tags as `key=value` pairs; see the valid keys below |
 | `NIM_MODEL_PROFILE` | Empty | Pin an exact profile ID from the current image |
 
+`NIM_TAGS_SELECTOR` accepts only these keys; any other key is an error. Values
+are lowercased.
+
+| Key | Meaning | Runtime |
+| --- | --- | --- |
+| `model_type`, `model_variant`, `precision` | Runtime, model, and precision | Both |
+| `profile` | `latency` or `throughput` | Generator |
+| `offload`, `text_guard_offload`, `video_guard_offload` | Offload modes | Generator |
+| `n_gpus` | GPUs used by one NIM; the product of `nim_dp`, `nim_gp`, `nim_up`, and `nim_tp` | Both |
+| `nim_dp` | Data-parallel model replicas; throughput profiles use `n_gpus` | Generator |
+| `nim_gp` | CFG (guidance) parallel factor; latency profiles on 2 or more GPUs use `2` | Generator |
+| `nim_up` | Ulysses sequence-parallel factor; latency profiles use `n_gpus / 2` | Generator |
+| `nim_tp` | Tensor-parallel factor; Super BF16 also has a 2-GPU `nim_tp=2` layout | Reasoner |
+
+`gp`, `cp`, and `dp` are accepted as aliases for `nim_gp`, `nim_up`, and
+`nim_dp`.
+
 Do not combine shorthand variables with conflicting values in
-`NIM_TAGS_SELECTOR`. Use the `model_variant` tag when filtering by model. Exact
-tags and profile IDs are tied to an image release and are less portable than
-automatic selection. Leave the unified-memory host reserve at its default unless
-host measurements establish a safe system-specific value; it does not affect
-discrete GPUs.
+`NIM_TAGS_SELECTOR`; a conflict is a startup error. Use the `model_variant` tag
+when filtering by model. Exact tags and profile IDs are tied to an image
+release and are less portable than automatic selection. Leave the
+unified-memory host reserve at its default unless host measurements establish
+a safe system-specific value; it does not affect discrete GPUs.
 
 ## Generator configuration
 
@@ -114,7 +132,7 @@ guidance](transfer.md#run-the-examples).
 
 | Name | Default | Use |
 | --- | --- | --- |
-| `NIM_ENABLE_WARMUP` | `false` | Run synthetic inference before readiness |
+| `NIM_ENABLE_WARMUP` | `false` | Run synthetic inference before readiness at the `256_1_1`, `480_16_9`, and `720_16_9` resolutions; Nano-DROID uses only `480_16_9`, and 4-step variants use their fixed step count |
 | `NIM_ENABLE_TORCH_COMPILE` | `true` | Enable the Generator compilation path |
 | `NIM_LINEAR_BACKEND` | Quantized profiles: `cutlass`; BF16: unset | Select `auto`, `cutlass`, `flashinfer_cutlass`, `flashinfer_cutedsl`, or `torch` for quantized Generator DiT linear layers |
 | `NIM_TRITON_LOG_VERBOSE` | `0` | Increase Generator backend logging during diagnosis |
