@@ -8,8 +8,7 @@ to both the Generator and the Reasoner.
 
 ## Prerequisites
 
-A running NIM that serves metrics. Confirm that the endpoint returns
-Prometheus text; see [Metrics](operations.md#metrics).
+A running NIM. Confirm that the metrics endpoint returns Prometheus text:
 
 ```bash
 export NIM_URL=${NIM_URL:-http://localhost:8000}
@@ -37,14 +36,10 @@ scrape_configs:
       - targets: ["cosmos3-generator:8002"]
 ```
 
-| Field | Value |
-|-------|-------|
-| `metrics_path` | `/v1/metrics` (not the Prometheus default `/metrics`) |
-| `targets` | `<host>:8000`, the NIM HTTP API port. Use the container name on a shared Docker network, or `localhost:8000` with host networking. |
-
-The `cosmos3-generator-triton` job scrapes the Generator's request metrics from
-the internal Triton port `8002`, which Prometheus reaches on the shared Docker
-network without publishing the port. Omit this job for a Reasoner.
+The NIM serves metrics at `/v1/metrics` on the HTTP API port `8000`, not at
+the Prometheus default `/metrics`. The `cosmos3-generator-triton` job scrapes
+Generator request metrics from the internal Triton port `8002`, reachable on
+the shared Docker network without publishing it; omit this job for a Reasoner.
 
 Run Prometheus with the config mounted read-only. This example uses a shared
 Docker network; attach the NIM container to it. The examples use the Generator
@@ -116,16 +111,15 @@ dashboard panels from them. Each runtime exposes different metric families:
 | Generator | `:8002/metrics` (Triton) | Per-model request metrics, labelled by `model` such as `Cosmos3Omni` and `Qwen3GuardFilter`: `nv_inference_count`, `nv_inference_request_success`, `nv_inference_request_failure`, `nv_inference_request_duration_us`, `nv_inference_queue_duration_us`; plus `nv_gpu_*` and `nv_cpu_*` gauges |
 | Reasoner | `:8000/v1/metrics` | vLLM request and cache metrics: `vllm:time_to_first_token_seconds`, `vllm:e2e_request_latency_seconds`, `vllm:num_requests_running`, `vllm:num_requests_waiting`, `vllm:kv_cache_usage_perc`; plus `gpu_*` gauges |
 
-Metric names can change between releases, so check the `/v1/metrics` (or
-`:8002/metrics`) output of your running service before building dashboards or
-alerts.
+Metric names can change between releases; check your service's output before
+building dashboards or alerts.
 
 ## Kubernetes
 
-For Helm deployments, set `metrics.serviceMonitor.enabled: true` to have
-Prometheus Operator scrape the NIM. See [Helm](helm.md). The chart's
-ServiceMonitor scrapes `/v1/metrics` on the `http-api` port, so Generator
-request metrics on port `8002` need an additional scrape target.
+For [Helm](helm.md) deployments, set `metrics.serviceMonitor.enabled: true`
+to create a Prometheus Operator `ServiceMonitor` that scrapes `/v1/metrics` on
+the `http-api` port. Generator request metrics on port `8002` need an
+additional scrape target.
 
 ## Security
 
