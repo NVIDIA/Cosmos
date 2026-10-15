@@ -125,6 +125,27 @@ When their fields are omitted, T2I uses:
 All resolution keys listed under [Resolution keys](#resolution-keys) are
 accepted for T2I. The supported keys stop at the 720 tier.
 
+T2V, I2V, and V2V use these defaults when fields are omitted:
+
+| Field | Video default |
+| --- | --- |
+| `resolution` | `720` (1280 × 720) |
+| `num_frames` | `189` |
+| `num_inference_steps` | `35` |
+| `guidance_scale` | `6.0` |
+| `flow_shift` | `10.0` |
+| `fps` | `24.0` |
+
+When `negative_prompt` is omitted, the default depends on the request:
+
+| Request | Default `negative_prompt` |
+| --- | --- |
+| T2I | Empty string |
+| T2V, I2V, V2V, Transfer, and Action | Built-in structured negative prompt |
+
+Send `"negative_prompt": ""` to disable the built-in prompt. The `nano-droid`
+variant rejects `negative_prompt`.
+
 ## Text-to-video
 
 A T2V request sets `model_mode` to `text2video`, has a non-empty `prompt`, and
@@ -269,9 +290,12 @@ output latent length. `condition_video_keep` selects frames from the beginning
 or end of the input and defaults to `first`.
 
 The decoded-video ceiling is 75 MB. Data URLs expand binary media by roughly
-one third, so large videos can make the JSON request substantially larger. Use
-the MP4 fixtures included with the examples, and verify any other container,
-codec, or remote-fetch path against the deployed image before depending on it.
+one third, so large videos can make the JSON request substantially larger. See
+[Media representations](#media-representations) for accepted video codecs.
+
+The default `condition_frame_indexes_vision` is `[0, 1]`. The source video must
+have at least `max(index) * 4 + 1` frames. An empty list or a negative index
+returns HTTP 422.
 
 ## Specialist T2I and I2V variants
 
@@ -281,9 +305,9 @@ selected image. Super also provides task-specific variants:
 | Variant | Accepted request | Sampling behavior |
 | --- | --- | --- |
 | `super-t2i` | T2I only | Full-step T2I; omitted `flow_shift` becomes `3.0` |
-| `super-t2i-4step` | T2I only | Fixed four-step scheduler |
-| `super-i2v` | I2V only | Full-step I2V; omitted `flow_shift` becomes `1.0` |
-| `super-i2v-4step` | I2V only | Fixed four-step scheduler |
+| `super-t2i-4step` | T2I only | Fixed four-step scheduler; steps `4`, guidance `1.0`, flow shift `1.0` |
+| `super-i2v` | I2V only | Full-step I2V; omitted `flow_shift` becomes `10.0` |
+| `super-i2v-4step` | I2V only | Fixed four-step scheduler; steps `4`, guidance `1.0`, flow shift `1.0` |
 
 A specialist rejects other Generator tasks. Select the exact matching variant
 before launch; `NIM_MODEL_VARIANT=super` selects the general-purpose `super`
@@ -303,7 +327,7 @@ uv run python examples/i2v_4step.py
 
 Each script must run against the matching active model. Four-step requests must
 omit `num_inference_steps`, `guidance_scale`, and `flow_shift`; the model owns
-those values.
+those values, and supplying any of them returns HTTP 422.
 `seed` and other ordinary fields remain available.
 
 ## Choose resolution, frames, and FPS
@@ -355,6 +379,9 @@ suffixes select distinct shapes.
 - T2I retains `fps` for the shared request model, but JPEG output has no frame
   rate.
 - For video, approximate duration is `num_frames / fps` seconds.
+- Fractional `fps` is passed unchanged to the model and the video encoder.
+  Rounding (`int(num_frames / fps)` for duration, `round(fps)`) applies only to
+  the prompt-upsampling text.
 - More `num_inference_steps` usually costs more latency. Start with 50 for T2I
   and 35 for standard video generation unless a validated recipe calls for another
   value.
@@ -366,13 +393,22 @@ Generator image and video inputs recognize:
 - raw base64;
 - a MIME-aware data URL such as `data:image/jpeg;base64,...` or
   `data:video/mp4;base64,...`; and
-- an HTTP(S) URL when `NIM_ALLOW_URL_INPUT` is enabled.
+- an HTTP(S) URL when `NIM_ALLOW_URL_INPUT` is enabled (the default).
+
+A data URL must use `;base64` and an `image/*` or `video/*` MIME type matching
+the field. An HTTP(S) URL is fetched with a 30-second timeout and must respond
+with a `Content-Type` of `image/*` or `video/*`. Generic
+`application/octet-stream` is accepted for video only when the URL or
+`Content-Disposition` names an `.mp4` file.
 
 Prefer data URLs for portable local-file examples. Remote inputs require
 container network access and introduce download, timeout, and content-change
-risks. The documented image formats and video codec are summarized in the
-[support matrix](support-matrix.md#media-and-codecs); verify other media paths
-against the deployed image.
+risks.
+
+Input videos must use one of these codecs: H.264, H.265/HEVC, MPEG-4, VP8,
+VP9, or AV1. Other codecs return HTTP 422. The container can be any format the
+decoder opens. Image formats are summarized in the
+[support matrix](support-matrix.md#media-and-codecs).
 
 ## Reproducibility
 

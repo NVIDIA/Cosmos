@@ -153,7 +153,7 @@ omit the nested control video:
 ```
 
 `"edge": true` and `"blur": true` select the corresponding derived control
-without an explicit preset; they require `input_reference`. A preset applies
+with preset `medium`; they require `input_reference`. A preset applies
 only to a derived control and cannot accompany nested `video`.
 
 Depth, segmentation, and WSM cannot be derived by the server; supply a
@@ -214,9 +214,15 @@ override as a normal production setting. See
 
 Control videos and video `input_reference` values accept raw base64, a video
 data URL, or an allowed HTTP(S) URL, with a 100,000,000-character encoded
-ceiling. Prefer data URLs and the included MP4 fixtures; verify any other
-container, codec, or remote-fetch path against the deployed image before
-relying on it.
+ceiling. Prefer data URLs. See
+[Media representations](generation.md#media-representations) for codecs and URL
+rules.
+
+- The source video and each control video must have at least `num_frames`
+  frames (WSM control: `num_frames - 1`).
+- Their aspect ratio must be within 5% of the requested output shape.
+- The decoded source and control videos together are capped at 225,000,000
+  bytes; each single video is also capped at 75,000,000 bytes.
 
 The response uses the Generator video shape: `b64_video` plus
 `action: null`. The inactive image field is omitted. The public script decodes

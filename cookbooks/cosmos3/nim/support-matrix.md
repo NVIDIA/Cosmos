@@ -334,7 +334,7 @@ out-of-memory failure and does not make the deployment supported.
 | Direction | Media | Documented formats/codecs and limits |
 | --- | --- | --- |
 | Input | Images | Use the included JPEG, PNG, and WebP fixtures; verify other formats against the deployed image |
-| Input | Videos | Use the included MP4 fixtures; verify other containers and codecs against the deployed image |
+| Input | Videos | H.264, H.265/HEVC, MPEG-4, VP8, VP9, and AV1; other codecs return HTTP 422; any container the decoder opens |
 | Output | Generator image | JPEG |
 | Output | Generator video | VP9 in MP4 |
 
