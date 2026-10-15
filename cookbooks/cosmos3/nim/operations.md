@@ -106,7 +106,9 @@ Common controls:
 | `NIM_DISABLE_LOG_REQUESTS` | true | Reasoner request-body logging control |
 
 Use `DEBUG` or verbose backend logging only during diagnosis; it can increase
-volume, expose request content, and affect performance. Never log
+volume, expose request content, and affect performance. At `INFO`, request
+prompts are redacted; at `DEBUG`, full prompts are logged, so treat `DEBUG`
+logs as sensitive. Never log
 `NGC_API_KEY`, `HF_TOKEN`, `NIM_PROMPT_UPSAMPLING_API_KEY`, raw media data
 URLs, or full prompts containing sensitive data.
 
@@ -224,7 +226,10 @@ The helper joins the selected profile from metadata to the YAML embedded in
 ## Guardrails
 
 Generator profiles run input/output guardrails controlled by operator
-configuration:
+configuration. The layers are an input-prompt blocklist and a Qwen3Guard text
+guard (both under the text switch), plus output face detection with blur and a
+SigLIP content check (under the video switches). The Reasoner has no
+NIM-provided guardrails.
 
 | Variable | Current default | Effect |
 | --- | --- | --- |
@@ -296,11 +301,22 @@ Before accepting traffic:
 
 ## Errors
 
-Generator schema, media, and guardrail validation generally returns HTTP 422.
-Reasoner sampling or request-shape failures commonly return 400, while invalid
-media can return 422. Unexpected backend failures return 500. Readiness can
-remain non-200 while model artifacts are downloaded, materialized, compiled,
-loaded, or warmed.
+| Runtime | Status | When | Body |
+| --- | --- | --- | --- |
+| Generator | 422 | Schema, field, or media validation fails, or a guardrail blocks the request | Envelope, `"type": "UnprocessableEntityError"`; a validation `message` is `<field>: <message>`, with multiple errors joined by `; ` |
+| Generator, Reasoner | 404 | Missing route, including the other runtime's inference route | Envelope, `"type": "NotFoundError"` |
+| Generator | 500 | Unhandled or backend error | Plain string instead of the envelope (below) |
+| Reasoner | 400 | Request-shape or sampling-parameter validation fails | Envelope, `"type": "BadRequestError"` |
+| Reasoner | 422 | An error whose message concerns video, image, media, decode, or codec | Envelope, `"type": "UnprocessableEntityError"` |
+
+The Generator 500 body is:
+
+```json
+{"error": "Internal Server Error. Please see server logs for more details."}
+```
+
+Readiness can remain non-200 while model artifacts are downloaded,
+materialized, compiled, loaded, or warmed.
 
 Use the HTTP status and stable error-object fields, and retain the returned
 message for diagnosis. Do not make automation depend on exact error wording. A
