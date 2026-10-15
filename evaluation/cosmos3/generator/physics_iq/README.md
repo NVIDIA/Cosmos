@@ -15,6 +15,11 @@ The notebook walks through both PhysicsIQ task formats:
   72-frame conditioning to 73 frames; generate 193 frames total; score
   frames 73..192.
 
+Scoring results are namespaced per task directory (`scoring/i2v_full`,
+`scoring/v2v_full`, ...), so the scorer's cached CSV can never be reused
+across tasks, and staged artifacts are re-staged automatically when they no
+longer probe as the expected frame count.
+
 ## Files
 
 - `run_with_cosmos_framework.ipynb` — main notebook.
