@@ -204,3 +204,25 @@ under the repository [LICENSE](../../../LICENSE). The running NIM exposes
 bundled product license information at `/v1/license`. The image also contains
 product terms, notices, component licenses, and the included package-modification source described
 under [Acknowledgements](acknowledgements/README.md).
+
+The Cosmos3 Certified NIM is distributed as an NGC container image through the
+NVIDIA NGC Catalog. A security scan report is available for each container in
+the NGC catalog, which provides a security rating of that image, a breakdown of
+CVE severity by package, and links to detailed information on the CVEs.
+
+## NVIDIA Developer Program
+
+Want to learn more about NIMs? Join the
+[NVIDIA Developer Program](https://developer.nvidia.com/join-nvidia-developer-program)
+to get free access to self-hosting NVIDIA NIMs and microservices on up to 16
+GPUs on any infrastructure: cloud, data center, or personal workstation.
+
+Once you join the free NVIDIA Developer Program, you can access NIMs through the
+[NVIDIA API Catalog](https://build.nvidia.com/explore/discover) at any time. For
+enterprise-grade security, support, and API stability, select the option to
+access NIM through our free 90-day NVIDIA AI Enterprise Trial with a business
+email address.
+
+Refer to the
+[NVIDIA NIM FAQ](https://forums.developer.nvidia.com/t/nvidia-nim-faq/300317)
+for additional information.
