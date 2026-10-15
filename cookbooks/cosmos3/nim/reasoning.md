@@ -333,6 +333,9 @@ The service supplies these values when omitted:
 | `top_p` | 0.8 | `(0, 1]` |
 | `top_k` | 20 | `-1` or integer `>= 1` |
 
+The service does not inject a default `max_tokens`; send `max_tokens`
+explicitly.
+
 `top_k`, `media_io_kwargs`, `structured_outputs`, guided-output fields, and
 `nvext` are request extensions. With the OpenAI client, put them explicitly in
 `extra_body`, as the video example does.

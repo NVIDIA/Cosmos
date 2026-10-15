@@ -176,7 +176,7 @@ correctness, latency, and throughput on the exact image before production use.
 
 | Name | Default | Use |
 | --- | --- | --- |
-| `NIM_MAX_MODEL_LEN` | `-1` (auto) | Let the runtime choose a context length bounded by the model |
+| `NIM_MAX_MODEL_LEN` | `-1` (auto) | Let the runtime choose a context length, bounded by the checkpoint limit of 262,144 tokens |
 | `NIM_MAX_NUM_BATCHED_TOKENS` | `16384` effective with the default unchunked multimodal input; otherwise `8192` | Set the scheduler token budget; unchunked multimodal input enforces a minimum of `16384` |
 | `NIM_MAX_NUM_SEQS` | `256` | Set maximum scheduled sequences |
 | `NIM_GPU_MEMORY_UTILIZATION` | `0.93` | Set the Reasoner GPU-memory target in `(0,1]`; startup warns when the target exceeds current free memory but does not reduce it. On DGX Spark/GB10 and Jetson AGX Thor, set `0.80` for image-only workloads or `0.70` for video or mixed-media workloads, and pass it from the first preflight through service launch. |
