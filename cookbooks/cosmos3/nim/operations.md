@@ -143,7 +143,8 @@ head metrics.txt
 ```
 
 Metric names can vary by image. Inspect the output before creating queries,
-dashboards, or alerts.
+dashboards, or alerts. For a Prometheus and Grafana walkthrough, see
+[Monitoring](monitoring.md).
 
 A minimal Prometheus job, if `/v1/metrics` is enabled:
 
