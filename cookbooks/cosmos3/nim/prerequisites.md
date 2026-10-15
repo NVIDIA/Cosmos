@@ -143,14 +143,16 @@ The host requires:
 | Software | Required version |
 | --- | --- |
 | Linux and `glibc` | Use a Linux host supported by the selected NVIDIA driver and container stack |
-| NVIDIA driver | Use a driver compatible with the CUDA user-space libraries in the release image |
+| NVIDIA driver | Recommended: NVIDIA driver 595.58.03 or newer. The image is built on CUDA 13.0 user-space libraries; confirm the host with the [verification steps](#verify-the-host) and a container start |
 | Docker Engine | Use a maintained Docker Engine release supported by NVIDIA Container Toolkit |
 | NVIDIA Container Toolkit | Use a maintained release configured for the host driver and Docker Engine |
 
 The CUDA user-space libraries required by the NIM are provided inside the
-container. Follow the driver and Container Toolkit installation instructions
-for the selected image instead of installing an unrelated host CUDA toolkit
-solely for the NIM.
+container. The image sets `NVIDIA_DRIVER_CAPABILITIES=compute,utility,video`;
+the `video` capability supplies the NVDEC video-decode libraries used by
+Reasoner, so do not override it with a narrower value. Follow the driver and
+Container Toolkit installation instructions for the selected image instead of
+installing an unrelated host CUDA toolkit solely for the NIM.
 
 ## Client tooling
 

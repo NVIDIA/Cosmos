@@ -230,9 +230,10 @@ mkdir -p "$LOCAL_NIM_CACHE"
 chmod -R a+rwX "$LOCAL_NIM_CACHE"
 ```
 
-The examples use permissive local-development permissions. In production, use
-an appropriate UID, group, or ACL policy. Keep the cache between runs to avoid
-repeated downloads and materialization.
+The examples use permissive local-development permissions. The container runs
+as UID and GID 1000 (`nvs`), so in production make the cache writable by that
+UID and GID through an appropriate group or ACL policy. Keep the cache between
+runs to avoid repeated downloads and materialization.
 
 ## Launch Generator
 
