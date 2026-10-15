@@ -33,6 +33,28 @@ Nano-DROID currently has BF16 profiles only.
 The NIM chooses the best compatible profile for these settings and the visible
 GPUs. A normal deployment does not need a profile ID.
 
+### GPU selection
+
+The GPUs exposed by Docker `--gpus` are the visible GPUs that automatic
+selection considers. List host GPUs with their indexes and UUIDs:
+
+```bash
+nvidia-smi -L
+```
+
+Then expose specific GPUs by index or UUID instead of `--gpus all`, for example
+`--gpus '"device=0,1"'` or `--gpus '"device=GPU-<uuid>"'`. Expose a GPU count
+listed for the chosen model in the [Generator](support-matrix.md#generator-configurations)
+or [Reasoner](support-matrix.md#reasoner-configurations) configurations; GPUs
+beyond the selected profile's count sit idle. Expose GPUs of a single model:
+mixed GPUs are not supported, as described in [GPU architecture and
+topology](support-matrix.md#gpu-architecture-and-topology).
+
+Use Docker device selection rather than `-e CUDA_VISIBLE_DEVICES` to restrict
+GPUs. The NIM sets `CUDA_VISIBLE_DEVICES` itself for its worker processes, so a
+value passed into the container can place work on GPUs outside the intended set.
+See [Deployment](deployment.md#launch-generator) for complete commands.
+
 ### Bring your own checkpoint
 
 | Name | Default | Use |
