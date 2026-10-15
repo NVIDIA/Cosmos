@@ -82,6 +82,11 @@ env:
     value: latency
 ```
 
+The chart also accepts these selectors as `model.selection.type`,
+`model.selection.variant`, `model.selection.precision`, and
+`model.selection.performanceProfile` values. Setting a selector both there and
+in `env` fails the render.
+
 Adjust it for the chosen configuration:
 
 - **Model and GPUs:** Change `NIM_MODEL_VARIANT`, `NIM_PERF_PROFILE`, and
@@ -225,7 +230,7 @@ The chart supports these cache options; use only one:
 | --- | --- | --- |
 | StatefulSet volume claims | `persistence.enabled: true` with the default `statefulSet.enabled: true` | Default. Each replica gets its own claim and downloads the model before it becomes ready |
 | Shared volume claim | `persistence.enabled: true`, `statefulSet.enabled: false`, `persistence.accessMode: ReadWriteMany` | One cache shared by all replicas; needs a `ReadWriteMany` storage class |
-| Existing claim | `persistence.existingClaim: <claim-name>` | Reuse a pre-filled cache. Run one replica unless the claim is `ReadWriteMany` |
+| Existing claim | `persistence.enabled: true`, `persistence.existingClaim: <claim-name>` | Reuse a pre-filled cache. Run one replica unless the claim is `ReadWriteMany` |
 | Direct NFS | `nfs.enabled: true`, `nfs.server`, `nfs.path` | Mount options cannot be set per pod; an NFS-backed claim is usually a better choice |
 | `hostPath` | `hostPath.enabled: true`, `hostPath.path` | Ties pods to one node and has security implications |
 
