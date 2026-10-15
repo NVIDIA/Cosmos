@@ -14,5 +14,4 @@ choices:
 - **Reasoner** serves OpenAI-compatible image and video understanding through
   Chat Completions and the Responses API.
 
-Each container starts one selected runtime. See [Deployment](deployment.md) for
-the current image and launch instructions.
+See [Deployment](deployment.md) for launch instructions.
