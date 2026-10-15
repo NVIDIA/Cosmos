@@ -264,3 +264,201 @@ kubectl get pvc
 StatefulSet volume claims are retained by default and keep the model cache.
 Delete them and the `ngc-secret` and `ngc-api` secrets only when they are no
 longer needed.
+
+## Chart parameters
+
+These are the `nim-wfm` chart values used with the chart version pinned on this
+page (1.3.0); run `helm show values "nim-wfm-${NIM_WFM_VERSION}.tgz"` for the
+authoritative list.
+
+### Deployment parameters
+
+| Name | Description | Value |
+| --- | --- | --- |
+| `affinity` | Affinity settings for deployment. | `{}` |
+| `containerSecurityContext` | Sets privilege and access control settings for container (Only affects the main container, not pod-level). | `{}` |
+| `customCommand` | Overrides command line options sent to the NIM with the array listed here. | `[]` |
+| `customArgs` | Overrides command line arguments of the NIM container with the array listed here. | `[]` |
+| `env` | Adds arbitrary environment variables to the main container. | `[]` |
+| `extraEnvFrom` | Adds arbitrary ConfigMap or Secret sources to the main container environment. | `[]` |
+| `extraVolumes` | Adds arbitrary additional volumes to the deployment set definition. | `{}` |
+| `extraVolumeMounts` | Adds volume mounts to the main container from `extraVolumes`. | `{}` |
+| `sharedMemory.enabled` | Mounts a RAM-backed `emptyDir` at `/dev/shm`. | `true` |
+| `sharedMemory.sizeLimit` | Optional Kubernetes quantity limiting the shared-memory volume. | `""` |
+| `image.repository` | Specifies the NIM-WFM image to deploy. | `nvcr.io/nvidia/nemo-microservices/nemoretriever-parse` |
+| `image.tag` | Specifies the image tag or version. | `""` |
+| `image.pullPolicy` | Sets the image pull policy. | `IfNotPresent` |
+| `imagePullSecrets` | Specifies a list of secret names that are needed for the main container and any init containers. | |
+| `initContainers` | Specifies model init containers, if needed. | |
+| `initContainers.extraInit` | Fully specify any additional init containers your use case requires. | `[]` |
+| `nodeSelector` | Sets node selectors for the NIM -- for example `nvidia.com/gpu.present: "true"`. | `{}` |
+| `runtimeClassName` | Selects the container runtime class for workload pods. | `""` |
+| `priorityClassName` | Selects the Kubernetes priority class for workload pods. | `""` |
+| `topologySpreadConstraints` | Configures pod topology spreading. | `[]` |
+| `podAnnotations` | Sets additional annotations on the main deployment pods. | `{}` |
+| `podSecurityContext` | Specifies security context settings for pod. | |
+| `podSecurityContext.runAsUser` | Specify user UID for pod. | `1000` |
+| `podSecurityContext.runAsGroup` | Specify group ID for pod. | `1000` |
+| `podSecurityContext.fsGroup` | Specify file system owner group id. | `1000` |
+| `proxyCA` | Specify a certificate for a custom proxy. When `proxyCA` is set native TLS is used for downloading from NGC. | |
+| `proxyCA.enabled` | Specify true if NIM is run behind a proxy. | `false` |
+| `proxyCA.secretName` | Specify a name of the Kubernetes secret containing the certificate. The secret is created before the deployment. Must be used together with `proxyCA.keyName` | `""` |
+| `proxyCA.keyName` | Specify a name of the key inside the secret which contains the certificate. Must be used together with `proxyCA.secretName` | `""` |
+| `terminationGracePeriodSeconds` | Seconds Kubernetes allows the NIM to terminate gracefully. | `60` |
+| `replicaCount` | Specify static replica count for deployment. | `1` |
+| `resources` | Specify resources limits and requests for the running service. | |
+| `resources.limits.nvidia.com/gpu` | Specify number of GPUs to present to the running service. | `1` |
+| `serviceAccount` | Options to specify service account for the deployment. | |
+| `serviceAccount.create` | Specifies whether a service account should be created. | `false` |
+| `serviceAccount.annotations` | Sets annotations to be added to the service account. | `{}` |
+| `serviceAccount.name` | Specifies the name of the service account to use. If it is not set and create is `true`, a name is generated using a `fullname` template. | `""` |
+| `statefulSet.enabled` | Enables `statefulset` deployment. Enabling `statefulSet` allows PVC templates for scaling. If using central PVC with RWX `accessMode`, this isn't needed. | `true` |
+| `tolerations` | Specify tolerations for pod assignment. Allows the scheduler to schedule pods with matching taints. | |
+
+### Autoscaling parameters
+
+Values used for creating a `Horizontal Pod Autoscaler`. If autoscaling is not
+enabled, the rest are ignored. NVIDIA recommends usage of the custom metrics
+API, commonly implemented with the Prometheus Adapter. Standard metrics of CPU
+and memory are of limited use in scaling NIM.
+
+| Name | Description | Value |
+| --- | --- | --- |
+| `autoscaling.enabled` | Enables horizontal pod autoscaler. | `false` |
+| `autoscaling.minReplicas` | Specify minimum replicas for autoscaling. | `1` |
+| `autoscaling.maxReplicas` | Specify maximum replicas for autoscaling. | `10` |
+| `autoscaling.metrics` | Array of metrics for autoscaling. | `[]` |
+
+### Ingress parameters
+
+| Name | Description | Value |
+| --- | --- | --- |
+| `ingress.enabled` | Enables ingress. | `false` |
+| `ingress.className` | Specify class name for Ingress. | `""` |
+| `ingress.annotations` | Specify additional annotations for ingress. | `{}` |
+| `ingress.hosts` | Specify list of hosts each containing lists of paths. | |
+| `ingress.hosts[0].host` | Specify name of host. | `chart-example.local` |
+| `ingress.hosts[0].paths[0].path` | Specify ingress path. | `/` |
+| `ingress.hosts[0].paths[0].pathType` | Specify path type. | `ImplementationSpecific` |
+| `ingress.tls` | Specify list of pairs of TLS `secretName` and hosts. | `[]` |
+
+### Probe parameters
+
+| Name | Description | Value |
+| --- | --- | --- |
+| `livenessProbe.enabled` | Enables `livenessProbe`. | `true` |
+| `livenessProbe.method` | `LivenessProbe` `http` or `script`, but no script is currently provided. | `http` |
+| `livenessProbe.command` | `LivenessProbe` script command to use (unsupported at this time). | `["myscript.sh"]` |
+| `livenessProbe.path` | `LivenessProbe` endpoint path. | `/v1/health/live` |
+| `livenessProbe.initialDelaySeconds` | Initial delay seconds for `livenessProbe`. | `15` |
+| `livenessProbe.timeoutSeconds` | Timeout seconds for `livenessProbe`. | `1` |
+| `livenessProbe.periodSeconds` | Period seconds for `livenessProbe`. | `10` |
+| `livenessProbe.successThreshold` | Success threshold for `livenessProbe`. | `1` |
+| `livenessProbe.failureThreshold` | Failure threshold for `livenessProbe`. | `3` |
+| `readinessProbe.enabled` | Enables `readinessProbe`. | `true` |
+| `readinessProbe.path` | Readiness Endpoint Path. | `/v1/health/ready` |
+| `readinessProbe.initialDelaySeconds` | Initial delay seconds for `readinessProbe`. | `15` |
+| `readinessProbe.timeoutSeconds` | Timeout seconds for `readinessProbe`. | `1` |
+| `readinessProbe.periodSeconds` | Period seconds for `readinessProbe`. | `10` |
+| `readinessProbe.successThreshold` | Success threshold for `readinessProbe`. | `1` |
+| `readinessProbe.failureThreshold` | Failure threshold for `readinessProbe`. | `3` |
+| `startupProbe.enabled` | Enables `startupProbe`. | `true` |
+| `startupProbe.path` | `StartupProbe` Endpoint Path. | `/v1/health/ready` |
+| `startupProbe.initialDelaySeconds` | Initial delay seconds for `startupProbe`. | `40` |
+| `startupProbe.timeoutSeconds` | Timeout seconds for `startupProbe`. | `1` |
+| `startupProbe.periodSeconds` | Period seconds for `startupProbe`. | `10` |
+| `startupProbe.successThreshold` | Success threshold for `startupProbe`. | `1` |
+| `startupProbe.failureThreshold` | Failure threshold for `startupProbe`. | `180` |
+
+### Helm test parameters
+
+The readiness test always uses the HTTP management endpoint, including when
+gRPC inference is selected. The inference test is opt-in because request
+payloads are model-specific, and it is only rendered for
+`model.inferenceProtocol: http`.
+
+| Name | Description | Value |
+| --- | --- | --- |
+| `tests.image.repository` | Container image repository used by Helm test pods. | `curlimages/curl` |
+| `tests.image.tag` | Container image tag used by Helm test pods. | `8.6.0` |
+| `tests.image.pullPolicy` | Container image pull policy used by Helm test pods. | `IfNotPresent` |
+| `tests.readiness.enabled` | Enables the HTTP readiness Helm test. | `true` |
+| `tests.readiness.path` | HTTP path used by the readiness Helm test. | `/v1/health/ready` |
+| `tests.readiness.timeoutSeconds` | Timeout in seconds for the readiness request. | `30` |
+| `tests.metadata.enabled` | Enables the runtime metadata Helm test. | `false` |
+| `tests.metadata.path` | HTTP path used by the metadata Helm test. | `/v1/metadata` |
+| `tests.metadata.timeoutSeconds` | Timeout in seconds for the metadata request. | `30` |
+| `tests.metadata.expectedModelType` | Optional expected `model_type` value. | `""` |
+| `tests.metadata.expectedInferenceEndpoint` | Optional expected `inference_endpoint` value. | `""` |
+| `tests.inference.enabled` | Enables the HTTP inference Helm test. This test is only rendered when `model.inferenceProtocol` is `http`. | `false` |
+| `tests.inference.path` | HTTP path used by the inference Helm test. | `/v1/infer` |
+| `tests.inference.timeoutSeconds` | Timeout in seconds for the inference request. | `300` |
+| `tests.inference.expectedStatus` | Expected HTTP status code from the inference request. | `200` |
+| `tests.inference.payload` | Request body sent by the inference Helm test. Required when the inference test is enabled. | `""` |
+| `tests.inference.expectedResponseField` | Optional response field required in the inference response. | `""` |
+
+### Metrics parameters
+
+| Name | Description | Value |
+| --- | --- | --- |
+| `metrics` | Configures Prometheus integration for the NIM HTTP metrics endpoint. | |
+| `metrics.serviceMonitor` | Options for `serviceMonitor` to use the Prometheus Operator and the primary service object. | |
+| `metrics.serviceMonitor.enabled` | Enables `serviceMonitor` creation. | `false` |
+| `metrics.serviceMonitor.additionalLabels` | Specify additional labels for `serviceMonitor`. | `{}` |
+| `metrics.serviceMonitor.port` | Named Service port scraped by ServiceMonitor. | `http-api` |
+| `metrics.serviceMonitor.path` | HTTP metrics path scraped by ServiceMonitor. | `/v1/metrics` |
+| `metrics.serviceMonitor.interval` | Optional Prometheus scrape interval. | `""` |
+| `metrics.serviceMonitor.scrapeTimeout` | Optional Prometheus scrape timeout. | `""` |
+
+### Models parameters
+
+| Name | Description | Value |
+| --- | --- | --- |
+| `model.nimCache` | Path to mount writable storage or a pre-filled model cache for the NIM. | `/model-store` |
+| `model.name` | Optional model name retained for compatibility with NIM-specific values files. | `nvidia/Cosmos3-Nano` |
+| `model.ngcAPISecret` | Name of a secret containing `NGC_API_KEY` for model downloads. When `model.ngcAPIKey` is set, the chart generates this secret; leave the name empty to generate only the image pull secret. | `ngc-api` |
+| `model.ngcAPIKey` | NGC API key literal used to generate the image pull secret and, when `model.ngcAPISecret` is nonempty, the model-download secret. | `""` |
+| `model.hfTokenSecret` | Name of a pre-existing secret with a key named `HF_TOKEN` for Hugging Face model downloads. | `""` |
+| `model.apiPort` | Specifies the HTTP API and management port. | `8000` |
+| `model.grpcPort` | Specifies the gRPC inference port. | `50051` |
+| `model.inferenceProtocol` | Selects `http` or `grpc` inference. The HTTP port remains available for health and management endpoints in gRPC mode. | `http` |
+| `model.selection.type` | Optional runtime selector mapped to `NIM_MODEL_TYPE`. | `""` |
+| `model.selection.variant` | Optional model variant mapped to `NIM_MODEL_VARIANT`. | `""` |
+| `model.selection.precision` | Optional precision mapped to `NIM_PRECISION`; empty preserves runtime auto-selection. | `""` |
+| `model.selection.performanceProfile` | Optional Generator objective mapped to `NIM_PERF_PROFILE`. | `""` |
+| `model.labels` | Specifies extra labels to be added on deployed pods. | `{}` |
+| `model.jsonLogging` | Turns JSON lines logging on or off. | `true` |
+| `model.logLevel` | Log level of the NIM service. Possible values are TRACE, DEBUG, INFO, WARNING, ERROR, and CRITICAL. | `INFO` |
+
+### Storage parameters
+
+| Name | Description | Value |
+| --- | --- | --- |
+| `persistence` | Specify settings to modify the behavior and use of persistent volumes for model weights. | |
+| `persistence.enabled` | Enables the use of persistent volumes. | `false` |
+| `persistence.existingClaim` | Specifies an existing persistent volume claim. If using `existingClaim`, run only one replica or use a `ReadWriteMany` storage setup. | `""` |
+| `persistence.storageClass` | Specifies the persistent volume storage class. If set to `"-"`, this disables dynamic provisioning. If left undefined or set to null, the cluster default storage provisioner is used. | `""` |
+| `persistence.accessMode` | Specify `accessMode`. If using an NFS or similar setup, you can use `ReadWriteMany`. | `ReadWriteOnce` |
+| `persistence.stsPersistentVolumeClaimRetentionPolicy.whenDeleted` | Specifies persistent volume claim retention policy when deleted. Only used with Stateful Set volume templates. | `Retain` |
+| `persistence.stsPersistentVolumeClaimRetentionPolicy.whenScaled` | Specifies persistent volume claim retention policy when scaled. Only used with Stateful Set volume templates. | `Retain` |
+| `persistence.size` | Specifies the size of the persistent volume claim (for example 40Gi). | `50Gi` |
+| `persistence.annotations` | Adds annotations to the persistent volume claim. | `{}` |
+| `hostPath` | Configures model cache on local disk on the nodes using `hostPath` -- for special cases. You should understand the security implications before using this option. | |
+| `hostPath.enabled` | Enable `hostPath`. | `false` |
+| `hostPath.path` | Specifies path on the node used as a `hostPath` volume. | `/model-store` |
+| `nfs` | Configures the model cache to sit on shared direct-mounted NFS. NOTE: you cannot set mount options using direct NFS mount to pods without a node-intalled nfsmount.conf. An NFS-based `PersistentVolumeClaim` is likely better in most cases. | |
+| `nfs.enabled` | Enables direct pod NFS mount. | `false` |
+| `nfs.path` | Specify path on NFS server to mount. | `/exports` |
+| `nfs.server` | Specify NFS server address. | `nfs-server.example.com` |
+| `nfs.readOnly` | Set to true to mount as read-only. | `false` |
+
+### Service parameters
+
+| Name | Description | Value |
+| --- | --- | --- |
+| `service.type` | Specifies the service type for the deployment. | `ClusterIP` |
+| `service.name` | Overrides the default service name. | `""` |
+| `service.apiPort` | Specifies the HTTP API and management port for the service. | `8000` |
+| `service.grpcPort` | Specifies the gRPC inference port for the service. It is exposed when `model.inferenceProtocol=grpc`. | `50051` |
+| `service.annotations` | Specifies additional annotations to be added to the service. | `{}` |
+| `service.labels` | Specifies additional labels to be added to the service. | `{}` |
