@@ -371,6 +371,54 @@ and `inference_endpoint`; verify that they identify `generator`
 and `/v1/infer`, or `reasoner` and `/v1/chat/completions`, before sending an
 inference request. This is verification, not a normal profile-selection step.
 
+## Offline and air-gapped deployment
+
+The NIM can start without network access from a model cache that an earlier
+online start filled. The cache holds only the artifacts of the profile that
+start selected, so fill it for every runtime and model configuration you will
+run offline.
+
+1. On a host with NGC access, launch each configuration as shown in
+   [Launch Generator](#launch-generator) or [Launch Reasoner](#launch-reasoner),
+   with the selectors and GPU exposure that the offline host will use, and wait
+   for readiness. Several configurations can share one cache directory.
+2. Copy the cache with a tool that preserves symbolic links:
+
+   ```bash
+   rsync -a "$LOCAL_NIM_CACHE/" /path/to/offline-cache/
+   ```
+
+   Model files under `ngc/hub/models--*/snapshots/` are relative symbolic links
+   into the neighboring `blobs/` directory. Tools that dereference symbolic
+   links or copy only regular files, such as some object-storage and archive
+   tools, break this layout. On the offline host,
+   `find /path/to/offline-cache -xtype l` lists broken links and should print
+   nothing. Apply the ownership described in
+   [Prepare the model cache](#prepare-the-model-cache) to the copy.
+3. On the offline host, set `LOCAL_NIM_CACHE` to the copy and run the same
+   launch command with the same selectors, so the copy is mounted at
+   `/opt/nim/.cache`. An offline Generator start from a complete cache reaches
+   readiness without `NGC_API_KEY`, so you can omit `-e NGC_API_KEY`. For
+   Reasoner, keep `-e NGC_API_KEY` as in its launch commands; an offline
+   Reasoner start without the key has not been validated.
+4. For Generator, do not set `NIM_DISABLE_MODEL_DOWNLOAD=1`. Startup rejects it
+   because Generator guardrail artifacts must be materialized; an offline start
+   works without it because materialization reuses the cached files.
+5. Check the startup logs and wait for readiness as described in
+   [Wait for readiness](#wait-for-readiness). With a complete cache, every
+   artifact is logged as `Skipping download, using cached copy of file` and no
+   file is downloaded. A `Downloading manifest profile` line still appears; it
+   does not indicate network access.
+
+To confirm on a connected host that a cache is complete before you move it,
+replace `-p 8000:8000` with `--network none` in the launch command. Without a
+published port, check readiness from inside the container:
+
+```bash
+docker exec cosmos3-generator python3 -c \
+  'import urllib.request as u; print(u.urlopen("http://localhost:8000/v1/health/ready").status)'
+```
+
 ## Advanced profile controls
 
 Most deployments should stop at model, optional precision, and Generator

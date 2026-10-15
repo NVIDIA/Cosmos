@@ -243,7 +243,8 @@ do not save the key in source control, and continue with
 
 An air-gapped deployment requires the selected image and a correctly
 pre-populated cache prepared through an approved workflow. Merely disabling
-model download does not create the required artifacts.
+model download does not create the required artifacts. See
+[Offline and air-gapped deployment](deployment.md#offline-and-air-gapped-deployment).
 
 ## Verify the host
 
