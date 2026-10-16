@@ -1,11 +1,11 @@
 <!-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: OpenMDW-1.1 -->
 
-# Cosmos3 Certified NIM release notes
+# Cosmos3 NIM release notes
 
 ## 2.0.0: Initial unified Cosmos3 NIM release
 
-This is the first release of the unified Cosmos3 Certified NIM, published as
+This is the first release of the unified Cosmos3 NIM, published as
 `nvcr.io/nim/nvidia/cosmos3:2.0.0`. One container image includes both runtime
 choices:
 

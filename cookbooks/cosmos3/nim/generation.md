@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: OpenMDW-1.1 -->
 
-# Generate images and videos with the Cosmos3 Certified NIM
+# Generate images and videos with the Cosmos3 NIM
 
 Send text-to-image (T2I), text-to-video (T2V), image-to-video (I2V), and
 video-to-video (V2V) requests to a running **Generator** with synchronous JSON

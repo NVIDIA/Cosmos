@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: OpenMDW-1.1 -->
 
-# Deploy the Cosmos3 Certified NIM
+# Deploy the Cosmos3 NIM
 
 Use this page to authenticate to NGC, choose a model, launch Generator or
 Reasoner, and verify the selected service. The commands pin the current 2.0.0

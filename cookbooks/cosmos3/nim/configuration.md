@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: OpenMDW-1.1 -->
 
-# Configure the Cosmos3 Certified NIM
+# Configure the Cosmos3 NIM
 
 This page lists launch-time environment variables. Start with the
 model-selection variables and keep automatic defaults unless the workload

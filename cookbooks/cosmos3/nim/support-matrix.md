@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: OpenMDW-1.1 -->
 
-# Cosmos3 Certified NIM support matrix
+# Cosmos3 NIM support matrix
 
 Match a model to precision, GPU compute capability, GPU count, per-device VRAM,
 and system memory. All memory values are binary GiB per device.

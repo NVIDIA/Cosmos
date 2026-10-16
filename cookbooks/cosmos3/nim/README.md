@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: OpenMDW-1.1 -->
 
-# Cosmos3 Certified NIM
+# Cosmos3 NIM
 
 Deploy Cosmos3 models for world generation and multimodal reasoning. One image
 contains two runtimes, but each container runs only one:

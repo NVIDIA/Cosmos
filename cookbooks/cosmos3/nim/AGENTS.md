@@ -1,10 +1,10 @@
 <!-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: OpenMDW-1.1 -->
 
-# Cosmos3 Certified NIM customer-assistant instructions
+# Cosmos3 NIM customer-assistant instructions
 
 These instructions help customers deploy, call, and troubleshoot the Cosmos3
-Certified NIM from this public documentation directory. For the guided
+NIM from this public documentation directory. For the guided
 workflow, load `.agents/skills/cosmos3-nim-user/SKILL.md`.
 
 ## Default behavior

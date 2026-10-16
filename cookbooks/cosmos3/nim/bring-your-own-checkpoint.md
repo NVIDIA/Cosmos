@@ -4,7 +4,7 @@ SPDX-License-Identifier: OpenMDW-1.1 -->
 # Bring your own Cosmos3 checkpoint
 
 Use this page to replace the selected Generator or Reasoner checkpoint while
-preserving the Certified NIM server, profile selection, and runtime contract.
+preserving the Cosmos3 NIM server, profile selection, and runtime contract.
 
 ## Supported boundary
 

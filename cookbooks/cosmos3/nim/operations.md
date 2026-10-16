@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: OpenMDW-1.1 -->
 
-# Operate and troubleshoot the Cosmos3 Certified NIM
+# Operate and troubleshoot the Cosmos3 NIM
 
 Interpret health, inspect the selected profile, configure logging and
 guardrails, and diagnose failures. See [Deployment](deployment.md) for launch

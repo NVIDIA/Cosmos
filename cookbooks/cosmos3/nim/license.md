@@ -1,9 +1,9 @@
 <!-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: OpenMDW-1.1 -->
 
-# Cosmos3 Certified NIM license and notices
+# Cosmos3 NIM license and notices
 
-The governing download terms for the Cosmos3 Certified NIM are:
+The governing download terms for the Cosmos3 NIM are:
 
 - Use of the container is governed by the
   [NVIDIA Software License](https://github.com/NVIDIA/cuda-python/blob/main/cuda_bindings/LICENSE)

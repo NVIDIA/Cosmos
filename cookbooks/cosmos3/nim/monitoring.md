@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: OpenMDW-1.1 -->
 
-# Monitor the Cosmos3 Certified NIM with Prometheus and Grafana
+# Monitor the Cosmos3 NIM with Prometheus and Grafana
 
 Scrape the NIM's Prometheus metrics and chart them in Grafana. The steps apply
 to both the Generator and the Reasoner.
@@ -24,7 +24,7 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: cosmos3-certified-nim
+  - job_name: cosmos3-nim
     metrics_path: /v1/metrics
     scrape_interval: 15s
     static_configs:
@@ -61,7 +61,7 @@ To scrape a NIM published on the host instead, use `--network host`, drop
 `-p 9090:9090`, and set the target to `localhost:8000`.
 
 Open `http://localhost:9090/targets` (**Status > Targets**). The
-`cosmos3-certified-nim` job, and for a Generator the `cosmos3-generator-triton`
+`cosmos3-nim` job, and for a Generator the `cosmos3-generator-triton`
 job, must show `UP`.
 
 | Symptom | Cause |

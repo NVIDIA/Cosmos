@@ -1,10 +1,10 @@
 <!-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: OpenMDW-1.1 -->
 
-# Prerequisites for the Cosmos3 Certified NIM
+# Prerequisites for the Cosmos3 NIM
 
-Prepare and verify a host before pulling or launching the Cosmos3 Certified
-NIM; per-configuration GPU, VRAM, and host RAM requirements are in the
+Prepare and verify a host before pulling or launching the Cosmos3 NIM;
+per-configuration GPU, VRAM, and host RAM requirements are in the
 [support matrix](support-matrix.md).
 
 ## Hardware requirements

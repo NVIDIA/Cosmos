@@ -1,13 +1,13 @@
 ---
 name: cosmos3-nim-user
-description: Guide customers through Cosmos3 Certified NIM deployment, endpoint verification, API example selection, hardware compatibility, and troubleshooting. Use for operating or calling the NIM from the public cookbooks/cosmos3/nim directory; do not use for maintaining the documentation itself.
+description: Guide customers through Cosmos3 NIM deployment, endpoint verification, API example selection, hardware compatibility, and troubleshooting. Use for operating or calling the NIM from the public cookbooks/cosmos3/nim directory; do not use for maintaining the documentation itself.
 license: OpenMDW-1.1
 ---
 
 <!-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: OpenMDW-1.1 -->
 
-# Cosmos3 Certified NIM customer workflow
+# Cosmos3 NIM customer workflow
 
 Work from `cookbooks/cosmos3/nim` and follow `AGENTS.md`. The public pages here
 are the source of truth; the rules below say which page owns each decision.
