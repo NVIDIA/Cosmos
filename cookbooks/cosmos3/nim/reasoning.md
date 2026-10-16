@@ -152,7 +152,9 @@ large data URLs in a request file, not shell arguments.
 
 ## Video reasoning with Chat Completions
 
-Use `video_url` content and pass NIM request extensions through `extra_body`:
+Use `video_url` content and pass NIM request extensions through `extra_body`.
+Input videos can be at most 3840 pixels wide and 2160 pixels tall, so portrait
+4K is also rejected; larger videos return HTTP 422, so downscale them first:
 
 ```python
 import base64
