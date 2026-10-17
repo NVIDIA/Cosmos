@@ -4,17 +4,19 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import multiprocessing as mp
 import os
 import queue
+import subprocess
 import sys
 import traceback
 from pathlib import Path
 from statistics import fmean
 
 
-RUNNER_VERSION = 2
+RUNNER_VERSION = 3
 
 
 def parse_args() -> argparse.Namespace:
@@ -74,6 +76,97 @@ def file_identity(path: Path) -> dict:
     }
 
 
+def _sha256(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def git_head(root: Path) -> str | None:
+    """Return the evaluator checkout HEAD, or None if it is not a git repo."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+    return result.stdout.strip()
+
+
+def git_status_hash(root: Path) -> str | None:
+    """Hash of `git status --porcelain` output; None if not a git repo."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "status", "--porcelain"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+    return _sha256(result.stdout.encode())
+
+
+def hash_patches(patches_dir: Path | None = None) -> dict:
+    """Hash of the checked-in compatibility patches.
+
+    Defaults to the `patches/` directory next to this script. Missing
+    directory yields status "missing" (soft degradation, not fatal).
+    """
+    if patches_dir is None:
+        patches_dir = Path(__file__).resolve().parent / "patches"
+    if not patches_dir.is_dir():
+        return {"sha256": None, "status": "missing"}
+    digest = hashlib.sha256()
+    for patch in sorted(patches_dir.glob("*.patch")):
+        content = patch.read_bytes()
+        # include name and length so different sets of patches cannot collide
+        digest.update(patch.name.encode())
+        digest.update(str(len(content)).encode())
+        digest.update(content)
+    return {"sha256": digest.hexdigest(), "status": "ok"}
+
+
+def hash_file(path: Path) -> str | None:
+    """Content SHA-256 of a file, or None if it does not exist."""
+    if not path.is_file():
+        return None
+    return _sha256(path.read_bytes())
+
+
+def build_evaluator_identity(
+    evaluator_root: Path, *, patches_dir: Path | None = None
+) -> dict:
+    """Fingerprint the effective scorer: source, patches, environment."""
+    head = git_head(evaluator_root)
+    status_hash = git_status_hash(evaluator_root)
+    if head is None or status_hash is None:
+        scorer_source = {"git_head": None, "status_hash": None, "status": "unavailable"}
+        print(
+            f"warning: evaluator root {evaluator_root} is not a git checkout; "
+            "resume protection degraded to path+mtime baseline",
+            flush=True,
+        )
+    else:
+        scorer_source = {
+            "git_head": head,
+            "status_hash": status_hash,
+            "status": "ok",
+        }
+    freeze = hash_file(evaluator_root / "scorer_environment.freeze.txt")
+    scorer_environment = (
+        {"sha256": freeze, "status": "ok"}
+        if freeze is not None
+        else {"sha256": None, "status": "missing"}
+    )
+    return {
+        "scorer_source": scorer_source,
+        "scorer_patches": hash_patches(patches_dir=patches_dir),
+        "scorer_environment": scorer_environment,
+    }
+
+
 def build_manifest(
     *,
     task: str,
@@ -82,12 +175,16 @@ def build_manifest(
     evaluator_root: Path,
     config: Path,
     checkpoint: Path,
+    patches_dir: Path | None = None,
 ) -> dict:
     return {
         "runner_version": RUNNER_VERSION,
         "task": task,
         "model_name": model_name,
         "evaluator_root": str(evaluator_root),
+        "evaluator_identity": build_evaluator_identity(
+            evaluator_root, patches_dir=patches_dir
+        ),
         "config": file_identity(config),
         "checkpoint": file_identity(checkpoint),
         "videos": [file_identity(path) for path in videos],
@@ -99,6 +196,18 @@ def prepare_manifest(output_dir: Path, result_file: Path, manifest: dict) -> Non
     worker_files = sorted(output_dir.glob("worker_*.json"))
     if manifest_path.exists():
         previous = json.loads(manifest_path.read_text())
+        if previous.get("evaluator_identity") is None:
+            raise RuntimeError(
+                f"legacy manifest without evaluator identity in {output_dir}; "
+                f"runner version changed (previous {previous.get('runner_version')}, "
+                f"current {manifest['runner_version']}); use a new output directory"
+            )
+        if previous["evaluator_identity"] != manifest["evaluator_identity"]:
+            raise RuntimeError(
+                f"evaluator identity mismatch in {output_dir}; "
+                "use a new output directory or restore the previous "
+                "evaluator checkout/patches/environment"
+            )
         if previous != manifest:
             raise RuntimeError(
                 f"manifest mismatch in {output_dir}; use a new output directory "
