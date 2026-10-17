@@ -540,7 +540,9 @@ for tid in task_ids:
 
 dst = output_dir / "input.jsonl"
 dst.parent.mkdir(parents=True, exist_ok=True)
-dst.write_text("\n".join(json.dumps(r) for r in rows))
+# Trailing newline: wc -l and line-oriented tools count the final row only
+# when the file ends with one.
+dst.write_text("".join(json.dumps(r) + "\n" for r in rows))
 print(f"Wrote {len(rows)} rows → {dst}")
 PY
 
@@ -609,7 +611,8 @@ for row in shard_rows:
         vision_mp4.unlink()
     pending.append(row)
 
-shard_jsonl.write_text("\n".join(json.dumps(r) for r in pending))
+# Trailing newline so line counting (wc -l) sees every pending row.
+shard_jsonl.write_text("".join(json.dumps(r) + "\n" for r in pending))
 skipped = len(shard_rows) - len(pending)
 print(f"Shard {shard_idx}/{num_shards}: {len(pending)} to generate, {skipped} already done")
 PY
@@ -620,7 +623,9 @@ PY
     for (( gi=0; gi<_num_gpus; gi++ )); do
         local _shard_jsonl="${_shard_jsonls[$gi]}"
         local _pending_count
-        _pending_count="$(wc -l < "$_shard_jsonl" | tr -d ' ')"
+        # NR counts the last row even without a trailing newline (and unlike
+        # wc -l, awk exits 0 on an empty file under set -o pipefail).
+        _pending_count="$(awk 'END{print NR}' "$_shard_jsonl")"
         local _gpu_id="${_gpu_ids[$gi]}"
 
         if [[ "$_pending_count" -eq 0 ]]; then
@@ -645,9 +650,11 @@ PY
         _worker_pids+=("$!")
     done
 
-    # Wait for all GPU workers to finish.
+    # Wait for all GPU workers to finish.  The ${var+...} expansion keeps the
+    # loop a no-op (instead of an "unbound variable" abort under set -u on
+    # bash < 4.4) when every shard was already complete.
     local _fail=0
-    for _pid in "${_worker_pids[@]}"; do
+    for _pid in ${_worker_pids[@]+"${_worker_pids[@]}"}; do
         wait "$_pid" || _fail=1
     done
     [[ "$_fail" -eq 0 ]] || die "One or more GPU workers failed for modality=$MODALITY"
@@ -715,10 +722,12 @@ _py_for_summary() {
     fi
 }
 
-for _mod in $PAIBENCH_C_MODALITIES; do
-    _videos_parent="$PAIBENCH_C_OUTPUT_ROOT/${_ckpt_slug}/$_mod"
-    _videos_dir="$_videos_parent/videos"
-    _metrics_out="$_videos_parent/metrics.json"
+evaluate_modality() {
+    local _mod="$1"
+    local _videos_parent="$PAIBENCH_C_OUTPUT_ROOT/${_ckpt_slug}/$_mod"
+    local _videos_dir="$_videos_parent/videos"
+    local _metrics_out="$_videos_parent/metrics.json"
+    local _eval_ngpu
     _eval_ngpu="$(int_min "$PAIBENCH_C_NUM_SAMPLES" "$COSMOS3_NUM_GPUS")"
 
     # Verify videos exist before launching torchrun to surface errors early.
@@ -727,9 +736,18 @@ for _mod in $PAIBENCH_C_MODALITIES; do
   Run without SKIP_GEN=1, or point PAIBENCH_C_OUTPUT_ROOT at an existing output tree."
     fi
     _nvideos="$(find "$_videos_dir" -name '*.mp4' | wc -l)"
-    if [[ "$_nvideos" -eq 0 ]]; then
-        die "No .mp4 files found in $_videos_dir
-  Re-run generation (remove SKIP_GEN=1) to produce videos."
+
+    # Evaluation must cover exactly the requested task set — scoring a subset
+    # would silently report the subset metric as the benchmark result.
+    local _expected_tasks
+    if [[ -f "$_videos_parent/input.jsonl" ]]; then
+        _expected_tasks="$(awk 'END{print NR}' "$_videos_parent/input.jsonl")"
+    else
+        _expected_tasks="$PAIBENCH_C_NUM_SAMPLES"
+    fi
+    if [[ "$_nvideos" -ne "$_expected_tasks" ]]; then
+        die "Coverage mismatch for modality=$_mod: found $_nvideos video(s), expected $_expected_tasks.
+  Evaluation refuses to score a partial benchmark. Re-run generation (remove SKIP_GEN=1) to produce the missing videos, or point PAIBENCH_C_OUTPUT_ROOT at the output tree that matches this input set."
     fi
     log "  Found $_nvideos video(s) in $_videos_dir"
 
@@ -765,6 +783,10 @@ m = json.loads(pathlib.Path(os.environ["_mout"]).read_text())
 for k, v in m["global"].items():
     print(f"    {k}: {v:.4f}")
 PY
+}
+
+for _mod in $PAIBENCH_C_MODALITIES; do
+    evaluate_modality "$_mod"
 done
 
 log "=== PAI-Bench-C complete ==="
